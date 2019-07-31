@@ -151,6 +151,11 @@ namespace Volatile
             return polygon;
         }
 
+        public VoltPolygon CreatePolygonWorldSpace(VoltVector2[] worldVertices, Fix64 density)
+        {
+            return CreatePolygonWorldSpace(worldVertices, density, VoltConfig.DEFAULT_FRICTION, VoltConfig.DEFAULT_RESTITUTION);
+        }
+
         public VoltPolygon CreatePolygonWorldSpace(VoltVector2[] worldVertices)
         {
             return CreatePolygonWorldSpace(worldVertices, VoltConfig.DEFAULT_DENSITY, VoltConfig.DEFAULT_FRICTION, VoltConfig.DEFAULT_RESTITUTION);
@@ -170,7 +175,12 @@ namespace Volatile
               restitution);
             return polygon;
         }
-
+        
+        public VoltPolygon CreatePolygonBodySpace(VoltVector2[] bodyVertices, Fix64 density)
+        {
+            return CreatePolygonBodySpace(bodyVertices, density, VoltConfig.DEFAULT_FRICTION, VoltConfig.DEFAULT_RESTITUTION);
+        }
+        
         public VoltPolygon CreatePolygonBodySpace(VoltVector2[] bodyVertices)
         {
             return CreatePolygonBodySpace(bodyVertices, VoltConfig.DEFAULT_DENSITY, VoltConfig.DEFAULT_FRICTION, VoltConfig.DEFAULT_RESTITUTION);

@@ -15,9 +15,9 @@ public class VolatileCircle : VolatileShape
   public override VoltShape PrepareShape(VoltWorld world)
   {
     this.shape = world.CreateCircleWorldSpace(
-      this.transform.position,
-      this.radius, 
-      this.density);
+      this.transform.position.ToFixed(),
+      this.radius.ToFixed(), 
+      this.density.ToFixed());
     return this.shape;
   }
 

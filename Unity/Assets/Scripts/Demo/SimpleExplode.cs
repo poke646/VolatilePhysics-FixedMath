@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using FixMath.NET;
 using UnityEngine;
 using Volatile;
 
@@ -36,8 +36,8 @@ public class SimpleExplode : MonoBehaviour
       this.showDelay = Time.time + 0.2f;
 
       VolatileWorld.Instance.World.PerformExplosion(
-        this.lastOrigin,
-        this.radius,
+        this.lastOrigin.ToFixed(),
+        this.radius.ToFixed(),
         this.ExplosionCallback,
         (body) => (body.IsStatic == false) && (body != this.body.Body),
         VoltWorld.FilterExcept(this.body.Body));
@@ -47,10 +47,10 @@ public class SimpleExplode : MonoBehaviour
   private void ExplosionCallback(
     VoltRayCast rayCast,
     VoltRayResult rayResult,
-    float rayWeight)
+    Fix64 rayWeight)
   {
-    Vector2 point = rayResult.ComputePoint(ref rayCast);
-    this.hits.Add(point);
+    VoltVector2 point = rayResult.ComputePoint(ref rayCast);
+    this.hits.Add(point.ToVector());
   }
 
   void OnDrawGizmos()

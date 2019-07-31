@@ -14,12 +14,12 @@ public class VolatilePolygon : VolatileShape
 
   public override VoltShape PrepareShape(VoltWorld world)
   {
-    Vector2[] vertices = new Vector2[this.points.Length];
+    VoltVector2[] vertices = new VoltVector2[this.points.Length];
     for (int i = 0; i < this.points.Length; i++)
-      vertices[i] = this.points[i].position;
+      vertices[i] = this.points[i].position.ToFixed();
     this.shape = world.CreatePolygonWorldSpace(
       vertices, 
-      this.density);
+      this.density.ToFixed());
     return this.shape;
   }
 

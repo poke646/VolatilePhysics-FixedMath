@@ -36,9 +36,9 @@ public class VolatileBody : MonoBehaviour
     float radians = Mathf.Deg2Rad * transform.eulerAngles.z;
 
     if (this.isStatic == true)
-      this.body = world.CreateStaticBody(position, radians, shapes.ToArray());
+      this.body = world.CreateStaticBody(position.ToFixed(), radians.ToFixed(), shapes.ToArray());
     else
-      this.body = world.CreateDynamicBody(position, radians, shapes.ToArray());
+      this.body = world.CreateDynamicBody(position.ToFixed(), radians.ToFixed(), shapes.ToArray());
 
     this.lastPosition = this.nextPosition = transform.position;
     this.lastAngle = this.nextAngle = transform.eulerAngles.z;
@@ -57,15 +57,15 @@ public class VolatileBody : MonoBehaviour
       }
       else
       {
-        transform.position = this.body.Position;
-        transform.rotation = Quaternion.Euler(0.0f, 0.0f, Mathf.Rad2Deg * this.body.Angle);
+        transform.position = this.body.Position.ToVector();
+        transform.rotation = Quaternion.Euler(0.0f, 0.0f, Mathf.Rad2Deg * (float)this.body.Angle);
       }
     }
     else
     {
       this.body.Set(
-        this.transform.position, 
-        Mathf.Deg2Rad * this.transform.rotation.eulerAngles.z);
+        this.transform.position.ToFixed(), 
+        (Mathf.Deg2Rad * this.transform.rotation.eulerAngles.z).ToFixed());
     }
   }
 
@@ -73,8 +73,8 @@ public class VolatileBody : MonoBehaviour
   {
     this.lastPosition = this.nextPosition;
     this.lastAngle = this.nextAngle;
-    this.nextPosition = this.body.Position;
-    this.nextAngle = this.body.Angle;
+    this.nextPosition = this.body.Position.ToVector();
+    this.nextAngle = (float)this.body.Angle;
   }
 
   void OnDrawGizmos()
@@ -84,22 +84,15 @@ public class VolatileBody : MonoBehaviour
 
     if (this.shapes != null)
     {
-      if (Application.isPlaying)
+      foreach (VolatileShape shape in this.shapes)
       {
-        VoltDebug.Draw(this.body);
-      }
-      else
-      {
-        foreach (VolatileShape shape in this.shapes)
-        {
-          shape.DrawShapeInEditor();
+        shape.DrawShapeInEditor();
 
-          // Draw True COM
-          Vector2 trueShapeCOM = shape.ComputeTrueCenterOfMass();
-          trueBodyCOM += trueShapeCOM;
-          Gizmos.color = Color.blue;
-          Gizmos.DrawWireSphere(trueShapeCOM, 0.1f);
-        }
+        // Draw True COM
+        Vector2 trueShapeCOM = shape.ComputeTrueCenterOfMass();
+        trueBodyCOM += trueShapeCOM;
+        Gizmos.color = Color.blue;
+        Gizmos.DrawWireSphere(trueShapeCOM, 0.1f);
       }
     }
 
@@ -121,16 +114,16 @@ public class VolatileBody : MonoBehaviour
 
   public void AddForce(Vector2 force)
   {
-    this.body.AddForce(force);
+    this.body.AddForce(force.ToFixed());
   }
 
   public void AddTorque(float radians)
   {
-    this.body.AddTorque(radians);
+    this.body.AddTorque(radians.ToFixed());
   }
 
   public void Set(Vector2 position, float radians)
   {
-    this.body.Set(position, radians);
+    this.body.Set(position.ToFixed(), radians.ToFixed());
   }
 }
