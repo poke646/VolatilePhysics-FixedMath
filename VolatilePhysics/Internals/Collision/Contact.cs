@@ -22,6 +22,8 @@
 using UnityEngine;
 #endif
 
+using FixMath.NET;
+
 namespace Volatile
 {
   internal sealed class Contact 
@@ -33,29 +35,29 @@ namespace Volatile
     #endregion
 
     #region Static Methods
-    private static float BiasDist(float dist)
+    private static Fix64 BiasDist(Fix64 dist)
     {
-      return VoltConfig.ResolveRate * Mathf.Min(0, dist + VoltConfig.ResolveSlop);
+      return VoltConfig.ResolveRate * Mathf.Min(Fix64.Zero, dist + VoltConfig.ResolveSlop);
     }
     #endregion
 
     private Vector2 position;
     private Vector2 normal;
-    private float penetration;
+    private Fix64 penetration;
 
     private Vector2 toA;
     private Vector2 toB;
     private Vector2 toALeft;
     private Vector2 toBLeft;
 
-    private float nMass;
-    private float tMass;
-    private float restitution;
-    private float bias;
-    private float jBias;
+    private Fix64 nMass;
+    private Fix64 tMass;
+    private Fix64 restitution;
+    private Fix64 bias;
+    private Fix64 jBias;
 
-    private float cachedNormalImpulse;
-    private float cachedTangentImpulse;
+    private Fix64 cachedNormalImpulse;
+    private Fix64 cachedTangentImpulse;
 
     public Contact()
     {
@@ -65,7 +67,7 @@ namespace Volatile
     internal Contact Assign(
       Vector2 position,
       Vector2 normal,
-      float penetration)
+      Fix64 penetration)
     {
       this.Reset();
 
@@ -86,11 +88,11 @@ namespace Volatile
       this.toALeft = this.toA.Left();
       this.toBLeft = this.toB.Left();
 
-      this.nMass = 1.0f / this.KScalar(bodyA, bodyB, this.normal);
-      this.tMass = 1.0f / this.KScalar(bodyA, bodyB, this.normal.Left());
+      this.nMass = Fix64.One / this.KScalar(bodyA, bodyB, this.normal);
+      this.tMass = Fix64.One / this.KScalar(bodyA, bodyB, this.normal.Left());
 
       this.bias = Contact.BiasDist(penetration);
-      this.jBias = 0;
+      this.jBias = Fix64.Zero;
       this.restitution =
         manifold.Restitution *
         Vector2.Dot(
@@ -111,15 +113,15 @@ namespace Volatile
     {
       VoltBody bodyA = manifold.ShapeA.Body;
       VoltBody bodyB = manifold.ShapeB.Body;
-      float elasticity = bodyA.World.Elasticity;
+      Fix64 elasticity = bodyA.World.Elasticity;
 
       // Calculate relative bias velocity
       Vector2 vb1 = bodyA.BiasVelocity + (bodyA.BiasRotation * this.toALeft);
       Vector2 vb2 = bodyB.BiasVelocity + (bodyB.BiasRotation * this.toBLeft);
-      float vbn = Vector2.Dot((vb1 - vb2), this.normal);
+      Fix64 vbn = Vector2.Dot((vb1 - vb2), this.normal);
 
       // Calculate and clamp the bias impulse
-      float jbn = this.nMass * (vbn - this.bias);
+      Fix64 jbn = this.nMass * (vbn - this.bias);
       jbn = Mathf.Max(-this.jBias, jbn);
       this.jBias += jbn;
 
@@ -128,20 +130,20 @@ namespace Volatile
 
       // Calculate relative velocity
       Vector2 vr = this.RelativeVelocity(bodyA, bodyB);
-      float vrn = Vector2.Dot(vr, this.normal);
+      Fix64 vrn = Vector2.Dot(vr, this.normal);
 
       // Calculate and clamp the normal impulse
-      float jn = nMass * (vrn + (this.restitution * elasticity));
+      Fix64 jn = nMass * (vrn + (this.restitution * elasticity));
       jn = Mathf.Max(-this.cachedNormalImpulse, jn);
       this.cachedNormalImpulse += jn;
 
       // Calculate the relative tangent velocity
-      float vrt = Vector2.Dot(vr, this.normal.Left());
+      Fix64 vrt = Vector2.Dot(vr, this.normal.Left());
 
       // Calculate and clamp the friction impulse
-      float jtMax = manifold.Friction * this.cachedNormalImpulse;
-      float jt = vrt * tMass;
-      float result = Mathf.Clamp(this.cachedTangentImpulse + jt, -jtMax, jtMax);
+      Fix64 jtMax = manifold.Friction * this.cachedNormalImpulse;
+      Fix64 jt = vrt * tMass;
+      Fix64 result = Mathf.Clamp(this.cachedTangentImpulse + jt, -jtMax, jtMax);
       jt = result - this.cachedTangentImpulse;
       this.cachedTangentImpulse = result;
 
@@ -154,31 +156,31 @@ namespace Volatile
     {
       this.position = Vector2.zero;
       this.normal = Vector2.zero;
-      this.penetration = 0.0f;
+      this.penetration = Fix64.Zero;
 
       this.toA = Vector2.zero;
       this.toB = Vector2.zero;
       this.toALeft = Vector2.zero;
       this.toBLeft = Vector2.zero;
 
-      this.nMass = 0.0f;
-      this.tMass = 0.0f;
-      this.restitution = 0.0f;
-      this.bias = 0.0f;
-      this.jBias = 0.0f;
+      this.nMass = Fix64.Zero;
+      this.tMass = Fix64.Zero;
+      this.restitution = Fix64.Zero;
+      this.bias = Fix64.Zero;
+      this.jBias = Fix64.Zero;
 
-      this.cachedNormalImpulse = 0.0f;
-      this.cachedTangentImpulse = 0.0f;
+      this.cachedNormalImpulse = Fix64.Zero;
+      this.cachedTangentImpulse = Fix64.Zero;
     }
 
-    private float KScalar(
+    private Fix64 KScalar(
       VoltBody bodyA,
       VoltBody bodyB,
       Vector2 normal)
     {
-      float massSum = bodyA.InvMass + bodyB.InvMass;
-      float r1cnSqr = VoltMath.Square(VoltMath.Cross(this.toA, normal));
-      float r2cnSqr = VoltMath.Square(VoltMath.Cross(this.toB, normal));
+      Fix64 massSum = bodyA.InvMass + bodyB.InvMass;
+      Fix64 r1cnSqr = VoltMath.Square(VoltMath.Cross(this.toA, normal));
+      Fix64 r2cnSqr = VoltMath.Square(VoltMath.Cross(this.toB, normal));
       return
         massSum +
         bodyA.InvInertia * r1cnSqr +
@@ -195,7 +197,7 @@ namespace Volatile
     private void ApplyNormalBiasImpulse(
       VoltBody bodyA,
       VoltBody bodyB,
-      float normalBiasImpulse)
+      Fix64 normalBiasImpulse)
     {
       Vector2 impulse = normalBiasImpulse * this.normal;
       bodyA.ApplyBias(-impulse, this.toA);
@@ -205,8 +207,8 @@ namespace Volatile
     private void ApplyContactImpulse(
       VoltBody bodyA,
       VoltBody bodyB,
-      float normalImpulseMagnitude,
-      float tangentImpulseMagnitude)
+      Fix64 normalImpulseMagnitude,
+      Fix64 tangentImpulseMagnitude)
     {
       Vector2 impulseWorld =
         new Vector2(normalImpulseMagnitude, tangentImpulseMagnitude);

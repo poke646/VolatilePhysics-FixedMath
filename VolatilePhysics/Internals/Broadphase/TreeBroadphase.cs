@@ -40,6 +40,7 @@
 * 3. This notice may not be removed or altered from any source distribution. 
 */
 
+using FixMath.NET;
 using System;
 using System.Collections.Generic;
 
@@ -157,17 +158,17 @@ namespace Volatile
     /// <summary>
     /// Get the ratio of the sum of the node areas to the root area.
     /// </summary>
-    public float AreaRatio
+    public Fix64 AreaRatio
     {
       get
       {
         if (this.rootId == NULL_NODE)
-          return 0.0f;
+          return Fix64.Zero;
 
         Node root = this.nodes[this.rootId];
-        float rootArea = root.aabb.Perimeter;
+        Fix64 rootArea = root.aabb.Perimeter;
 
-        float totalArea = 0.0f;
+        Fix64 totalArea = Fix64.Zero;
         for (int i = 0; i < this.nodeCapacity; ++i)
         {
           Node node = this.nodes[i];
@@ -314,7 +315,7 @@ namespace Volatile
 
     public void QueryCircle(
       Vector2 point, 
-      float radius,
+      Fix64 radius,
       VoltBuffer<VoltBody> outBuffer)
     {
       this.StartQuery(outBuffer);
@@ -341,7 +342,7 @@ namespace Volatile
 
     public void CircleCast(
       ref VoltRayCast ray, 
-      float radius,
+      Fix64 radius,
       VoltBuffer<VoltBody> outBuffer)
     {
       this.StartQuery(outBuffer);
@@ -493,19 +494,19 @@ namespace Volatile
         int child1 = indexNode.left;
         int child2 = indexNode.right;
 
-        float area = indexNode.aabb.Perimeter;
+        Fix64 area = indexNode.aabb.Perimeter;
 
         VoltAABB combinedAABB = new VoltAABB();
         VoltAABB.CreateMerged(indexNode.aabb, leafAABB);
-        float combinedArea = combinedAABB.Perimeter;
+        Fix64 combinedArea = combinedAABB.Perimeter;
 
         // Cost of creating a new parent for this node and the new leaf
-        float cost = 2.0f * combinedArea;
+        Fix64 cost = (Fix64)2 * combinedArea;
 
         // Minimum cost of pushing the leaf further down the tree
-        float inheritanceCost = 2.0f * (combinedArea - area);
-        float cost1 = this.GetCost(child1, ref leafAABB) + inheritanceCost;
-        float cost2 = this.GetCost(child2, ref leafAABB) + inheritanceCost;
+        Fix64 inheritanceCost = (Fix64)2 * (combinedArea - area);
+        Fix64 cost1 = this.GetCost(child1, ref leafAABB) + inheritanceCost;
+        Fix64 cost2 = this.GetCost(child2, ref leafAABB) + inheritanceCost;
 
         // Descend according to the minimum cost.
         if ((cost < cost1) && (cost1 < cost2))
@@ -536,7 +537,7 @@ namespace Volatile
       }
     }
 
-    private float GetCost(int index, ref VoltAABB leafAABB)
+    private Fix64 GetCost(int index, ref VoltAABB leafAABB)
     {
       if (this.nodes[index].IsLeaf)
       {
@@ -548,8 +549,8 @@ namespace Volatile
       {
         VoltAABB aabb =
           VoltAABB.CreateMerged(leafAABB, this.nodes[index].aabb);
-        float oldArea = this.nodes[index].aabb.Perimeter;
-        float newArea = aabb.Perimeter;
+        Fix64 oldArea = this.nodes[index].aabb.Perimeter;
+        Fix64 newArea = aabb.Perimeter;
         return newArea - oldArea;
       }
     }

@@ -18,6 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using FixMath.NET;
 using System;
 using System.Collections.Generic;
 
@@ -53,12 +54,12 @@ namespace Volatile
   internal struct Axis
   {
     internal Vector2 Normal { get { return this.normal; } }
-    internal float Width { get { return this.width; } }
+    internal Fix64 Width { get { return this.width; } }
 
     private readonly Vector2 normal;
-    private readonly float width;
+    private readonly Fix64 width;
 
-    internal Axis(Vector2 normal, float width)
+    internal Axis(Vector2 normal, Fix64 width)
     {
       this.normal = normal;
       this.width = width;

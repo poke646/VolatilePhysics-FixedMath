@@ -18,6 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using FixMath.NET;
 using System;
 using System.Collections.Generic;
 
@@ -82,7 +83,7 @@ namespace Volatile
     internal Axis BodyToWorldAxis(Axis axis)
     {
       Vector2 normal = axis.Normal.Rotate(this.facing);
-      float width = Vector2.Dot(normal, this.position) + axis.Width;
+      Fix64 width = Vector2.Dot(normal, this.position) + axis.Width;
       return new Axis(normal, width);
     }
     #endregion

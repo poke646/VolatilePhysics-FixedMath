@@ -18,6 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using FixMath.NET;
 using System;
 using System.Collections.Generic;
 
@@ -30,7 +31,7 @@ namespace Volatile
   public struct VoltAABB
   {
     #region Static Methods
-    public static VoltAABB CreateExpanded(VoltAABB aabb, float expansionAmount)
+    public static VoltAABB CreateExpanded(VoltAABB aabb, Fix64 expansionAmount)
     {
       return new VoltAABB(
         aabb.top + expansionAmount,
@@ -50,17 +51,17 @@ namespace Volatile
 
     public static VoltAABB CreateSwept(VoltAABB source, Vector2 vector)
     {
-      float top = source.top;
-      float bottom = source.bottom;
-      float left = source.left;
-      float right = source.right;
+      Fix64 top = source.top;
+      Fix64 bottom = source.bottom;
+      Fix64 left = source.left;
+      Fix64 right = source.right;
 
-      if (vector.x < 0.0f)
+      if (vector.x < Fix64.Zero)
         left += vector.x;
       else
         right += vector.x;
 
-      if (vector.y < 0.0f)
+      if (vector.y < Fix64.Zero)
         bottom += vector.y;
       else
         top += vector.y;
@@ -74,22 +75,22 @@ namespace Volatile
     /// </summary>
     private static bool RayCast(
       ref VoltRayCast ray,
-      float top,
-      float bottom,
-      float left,
-      float right)
+      Fix64 top,
+      Fix64 bottom,
+      Fix64 left,
+      Fix64 right)
     {
-      float txmin =
+      Fix64 txmin =
         ((ray.signX ? right : left) - ray.origin.x) *
         ray.invDirection.x;
-      float txmax =
+      Fix64 txmax =
         ((ray.signX ? left : right) - ray.origin.x) *
         ray.invDirection.x;
 
-      float tymin =
+      Fix64 tymin =
         ((ray.signY ? top : bottom) - ray.origin.y) *
         ray.invDirection.y;
-      float tymax =
+      Fix64 tymax =
         ((ray.signY ? bottom : top) - ray.origin.y) *
         ray.invDirection.y;
 
@@ -99,7 +100,7 @@ namespace Volatile
         txmin = tymin;
       if (tymax < txmax)
         txmax = tymax;
-      return (txmax > 0.0f) && (txmin < ray.distance);
+      return (txmax > Fix64.Zero) && (txmin < ray.distance);
     }
     #endregion
 
@@ -123,30 +124,30 @@ namespace Volatile
       get { return new Vector2(this.right, this.bottom); } 
     }
 
-    public float Top { get { return this.top; } }
-    public float Bottom { get { return this.bottom; } }
-    public float Left { get { return this.left; } }
-    public float Right { get { return this.right; } }
+    public Fix64 Top { get { return this.top; } }
+    public Fix64 Bottom { get { return this.bottom; } }
+    public Fix64 Left { get { return this.left; } }
+    public Fix64 Right { get { return this.right; } }
 
-    public float Width { get { return this.Right - this.Left; } }
-    public float Height { get { return this.Top - this.Bottom; } }
+    public Fix64 Width { get { return this.Right - this.Left; } }
+    public Fix64 Height { get { return this.Top - this.Bottom; } }
 
-    public float Area { get { return this.Width * this.Height; } }
-    public float Perimeter 
+    public Fix64 Area { get { return this.Width * this.Height; } }
+    public Fix64 Perimeter 
     { 
-      get { return 2.0f * (this.Width + this.Height); } 
+      get { return (Fix64)2 * (this.Width + this.Height); } 
     }
 
     public Vector2 Center { get { return this.ComputeCenter(); } }
     public Vector2 Extent 
     { 
-      get { return new Vector2(this.Width * 0.5f, this.Height * 0.5f); } 
+      get { return new Vector2(this.Width / (Fix64)2, this.Height / (Fix64)2); } 
     }
 
-    private readonly float top;
-    private readonly float bottom;
-    private readonly float left;
-    private readonly float right;
+    private readonly Fix64 top;
+    private readonly Fix64 bottom;
+    private readonly Fix64 left;
+    private readonly Fix64 right;
 
     #region Tests
     /// <summary>
@@ -164,7 +165,7 @@ namespace Volatile
     /// <summary>
     /// Note: This doesn't take rounded edges into account.
     /// </summary>
-    public bool QueryCircleApprox(Vector2 origin, float radius)
+    public bool QueryCircleApprox(Vector2 origin, Fix64 radius)
     {
       return
         (this.left - radius) <= origin.x &&
@@ -186,7 +187,7 @@ namespace Volatile
     /// <summary>
     /// Note: This doesn't take rounded edges into account.
     /// </summary>
-    public bool CircleCastApprox(ref VoltRayCast ray, float radius)
+    public bool CircleCastApprox(ref VoltRayCast ray, Fix64 radius)
     {
       return VoltAABB.RayCast(
         ref ray,
@@ -216,7 +217,7 @@ namespace Volatile
     }
     #endregion
 
-    public VoltAABB(float top, float bottom, float left, float right)
+    public VoltAABB(Fix64 top, Fix64 bottom, Fix64 left, Fix64 right)
     {
       this.top = top;
       this.bottom = bottom;
@@ -235,7 +236,7 @@ namespace Volatile
       this.left = bottomLeft.x;
     }
 
-    public VoltAABB(Vector2 center, float radius)
+    public VoltAABB(Vector2 center, Fix64 radius)
       : this (center, new Vector2(radius, radius))
     {
     }
@@ -263,8 +264,8 @@ namespace Volatile
     private Vector2 ComputeCenter()
     {
       return new Vector2(
-        (this.Width * 0.5f) + this.left, 
-        (this.Height * 0.5f) + this.bottom);
+        (this.Width / (Fix64)2) + this.left, 
+        (this.Height / (Fix64)2) + this.bottom);
     }
 
     #region Debug

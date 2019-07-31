@@ -18,6 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using FixMath.NET;
 using System;
 using System.Collections.Generic;
 
@@ -32,9 +33,9 @@ namespace Volatile
     #region Factory Functions
     internal void InitializeFromWorldVertices(
       Vector2[] vertices,
-      float density,
-      float friction,
-      float restitution)
+      Fix64 density,
+      Fix64 friction,
+      Fix64 restitution)
     {
       base.Initialize(density, friction, restitution);
       this.UpdateArrays(vertices.Length);
@@ -50,9 +51,9 @@ namespace Volatile
 
     internal void InitializeFromBodyVertices(
       Vector2[] vertices,
-      float density,
-      float friction,
-      float restitution)
+      Fix64 density,
+      Fix64 friction,
+      Fix64 restitution)
     {
       base.Initialize(density, friction, restitution);
       this.UpdateArrays(vertices.Length);
@@ -101,10 +102,10 @@ namespace Volatile
       Vector2[] vertices,
       int count)
     {
-      float top = vertices[0].y;
-      float bottom = vertices[0].y;
-      float left = vertices[0].x;
-      float right = vertices[0].x;
+      Fix64 top = vertices[0].y;
+      Fix64 bottom = vertices[0].y;
+      Fix64 left = vertices[0].x;
+      Fix64 right = vertices[0].x;
 
       for (int i = 1; i < count; i++)
       {
@@ -200,10 +201,10 @@ namespace Volatile
 
     protected override bool ShapeQueryCircle(
       Vector2 bodySpaceOrigin,
-      float radius)
+      Fix64 radius)
     {
       // Get the axis on the polygon closest to the circle's origin
-      float penetration;
+      Fix64 penetration;
       int foundIndex =
         Collision.FindAxisMaxPenetration(
           bodySpaceOrigin,
@@ -221,7 +222,7 @@ namespace Volatile
 
       // If the circle is past one of the two vertices, check it like
       // a circle-circle intersection where the vertex has radius 0
-      float d = VoltMath.Cross(axis.Normal, bodySpaceOrigin);
+      Fix64 d = VoltMath.Cross(axis.Normal, bodySpaceOrigin);
       if (d > VoltMath.Cross(axis.Normal, a))
         return Collision.TestPointCircleSimple(a, bodySpaceOrigin, radius);
       if (d < VoltMath.Cross(axis.Normal, b))
@@ -234,8 +235,8 @@ namespace Volatile
       ref VoltRayResult result)
     {
       int foundIndex = -1;
-      float inner = float.MaxValue;
-      float outer = 0;
+      Fix64 inner = Fix64.MaxValue;
+      Fix64 outer = Fix64.Zero;
       bool couldBeContained = true;
 
       for (int i = 0; i < this.countBody; i++)
@@ -244,23 +245,23 @@ namespace Volatile
 
         // Distance between the ray origin and the axis/edge along the 
         // normal (i.e., shortest distance between ray origin and the edge)
-        float proj = 
+        Fix64 proj = 
           Vector2.Dot(curAxis.Normal, bodySpaceRay.origin) - curAxis.Width;
 
         // See if the point is outside of any of the axes
-        if (proj > 0.0f)
+        if (proj > Fix64.Zero)
           couldBeContained = false;
 
         // Projection of the ray direction onto the axis normal (use 
         // negative normal because we want to get the penetration length)
-        float slope = Vector2.Dot(-curAxis.Normal, bodySpaceRay.direction);
+        Fix64 slope = Vector2.Dot(-curAxis.Normal, bodySpaceRay.direction);
 
-        if (slope == 0.0f)
+        if (slope == Fix64.Zero)
           continue;
-        float dist = proj / slope;
+        Fix64 dist = proj / slope;
 
         // The ray is pointing opposite the edge normal (towards the edge)
-        if (slope > 0.0f)
+        if (slope > Fix64.Zero)
         {
           if (dist > inner)
           {
@@ -305,7 +306,7 @@ namespace Volatile
 
     protected override bool ShapeCircleCast(
       ref VoltRayCast bodySpaceRay,
-      float radius,
+      Fix64 radius,
       ref VoltRayResult result)
     {
       bool checkVertices =
@@ -366,7 +367,7 @@ namespace Volatile
       Vector2 worldSpaceNormal)
     {
       foreach (Axis axis in this.worldAxes)
-        if (Vector2.Dot(axis.Normal, worldSpaceNormal) >= 0.0f &&
+        if (Vector2.Dot(axis.Normal, worldSpaceNormal) >= Fix64.Zero &&
             Vector2.Dot(axis.Normal, worldSpacePoint) > axis.Width)
           return false;
       return true;
@@ -391,9 +392,9 @@ namespace Volatile
       }
     }
 
-    private float ComputeArea()
+    private Fix64 ComputeArea()
     {
-      float sum = 0;
+      Fix64 sum = Fix64.Zero;
 
       for (int i = 0; i < this.countBody; i++)
       {
@@ -404,38 +405,38 @@ namespace Volatile
         sum += u.x * (v.y - w.y);
       }
 
-      return sum / 2.0f;
+      return sum / (Fix64)2;
     }
 
-    private float ComputeInertia()
+    private Fix64 ComputeInertia()
     {
-      float s1 = 0.0f;
-      float s2 = 0.0f;
+      Fix64 s1 = Fix64.Zero;
+      Fix64 s2 = Fix64.Zero;
 
       for (int i = 0; i < this.countBody; i++)
       {
         Vector2 v = this.bodyVertices[i];
         Vector2 u = this.bodyVertices[(i + 1) % this.countBody];
 
-        float a = VoltMath.Cross(u, v);
-        float b = v.sqrMagnitude + u.sqrMagnitude + Vector2.Dot(v, u);
+        Fix64 a = VoltMath.Cross(u, v);
+        Fix64 b = v.sqrMagnitude + u.sqrMagnitude + Vector2.Dot(v, u);
         s1 += a * b;
         s2 += a;
       }
 
-      return s1 / (6.0f * s2);
+      return s1 / ((Fix64)6 * s2);
     }
 
     private bool CircleCastEdges(
       ref VoltRayCast bodySpaceRay,
-      float radius,
+      Fix64 radius,
       ref VoltRayResult result)
     {
       int foundIndex = -1;
       bool couldBeContained = true;
 
       // Pre-compute and initialize values
-      float shortestDist = float.MaxValue;
+      Fix64 shortestDist = Fix64.MaxValue;
       Vector2 v3 = bodySpaceRay.direction.Left();
 
       // Check the edges -- this will be different from the raycast because
@@ -452,7 +453,7 @@ namespace Volatile
         // Update the check for containment
         if (couldBeContained == true)
         {
-          float proj = 
+          Fix64 proj = 
             Vector2.Dot(curAxis.Normal, bodySpaceRay.origin) - curAxis.Width;
 
           // The point lies outside of the outer layer
@@ -461,10 +462,10 @@ namespace Volatile
             couldBeContained = false;
           }
           // The point lies between the outer and inner layer
-          else if (proj > 0.0f)
+          else if (proj > Fix64.Zero)
           {
             // See if the point is within the center Vornoi region of the edge
-            float d = VoltMath.Cross(curAxis.Normal, bodySpaceRay.origin);
+            Fix64 d = VoltMath.Cross(curAxis.Normal, bodySpaceRay.origin);
             if (d > VoltMath.Cross(curAxis.Normal, a))
               couldBeContained = false;
             if (d < VoltMath.Cross(curAxis.Normal, b))
@@ -473,7 +474,7 @@ namespace Volatile
         }
 
         // For the cast, only consider rays pointing towards the edge
-        if (Vector2.Dot(curAxis.Normal, bodySpaceRay.direction) >= 0.0f)
+        if (Vector2.Dot(curAxis.Normal, bodySpaceRay.direction) >= Fix64.Zero)
           continue;
 
         // See: 
@@ -481,11 +482,11 @@ namespace Volatile
         Vector2 v1 = bodySpaceRay.origin - a;
         Vector2 v2 = b - a;
 
-        float denominator = Vector2.Dot(v2, v3);
-        float t1 = VoltMath.Cross(v2, v1) / denominator;
-        float t2 = Vector2.Dot(v1, v3) / denominator;
+        Fix64 denominator = Vector2.Dot(v2, v3);
+        Fix64 t1 = VoltMath.Cross(v2, v1) / denominator;
+        Fix64 t2 = Vector2.Dot(v1, v3) / denominator;
 
-        if ((t2 >= 0.0f) && (t2 <= 1.0f) && (t1 > 0.0f) && (t1 < shortestDist))
+        if ((t2 >= Fix64.Zero) && (t2 <= Fix64.One) && (t1 > Fix64.Zero) && (t1 < shortestDist))
         {
           // See if the point is outside of any of the axes
           shortestDist = t1;
@@ -512,10 +513,10 @@ namespace Volatile
 
     private bool CircleCastVertices(
       ref VoltRayCast bodySpaceRay,
-      float radius,
+      Fix64 radius,
       ref VoltRayResult result)
     {
-      float sqrRadius = radius * radius;
+      Fix64 sqrRadius = radius * radius;
       bool castHit = false;
 
       for (int i = 0; i < this.countBody; i++)
@@ -542,7 +543,7 @@ namespace Volatile
       Color normalColor,
       Color originColor,
       Color aabbColor,
-      float normalLength)
+      Fix64 normalLength)
     {
       Color current = Gizmos.color;
 

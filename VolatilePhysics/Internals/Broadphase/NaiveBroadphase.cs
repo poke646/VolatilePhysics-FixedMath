@@ -22,6 +22,8 @@
 using UnityEngine;
 #endif
 
+using FixMath.NET;
+
 namespace Volatile
 {
   internal class NaiveBroadphase : IBroadPhase
@@ -87,7 +89,7 @@ namespace Volatile
 
     public void QueryCircle(
       Vector2 point,
-      float radius,
+      Fix64 radius,
       VoltBuffer<VoltBody> outBuffer)
     {
       outBuffer.Add(this.bodies, this.count);
@@ -102,7 +104,7 @@ namespace Volatile
 
     public void CircleCast(
       ref VoltRayCast ray,
-      float radius,
+      Fix64 radius,
       VoltBuffer<VoltBody> outBuffer)
     {
       outBuffer.Add(this.bodies, this.count);

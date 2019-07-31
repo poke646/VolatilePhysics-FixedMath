@@ -19,54 +19,63 @@
 */
 
 #if !UNITY
+
+using System;
+using FixMath.NET;
+
 namespace Volatile
 {
-  public static class Mathf
-  {
-    public const float PI = 3.141593f;
-
-    public static float Clamp(float value, float min, float max)
+    public static class Mathf
     {
-      if (value > max)
-        return max;
-      if (value < min)
-        return min;
-      return value;
-    }
+        public static readonly Fix64 PI = Fix64.Pi;
 
-    public static float Max(float a, float b)
-    {
-      if (a > b)
-        return a;
-      return b;
-    }
+        public static Fix64 Clamp(Fix64 value, Fix64 min, Fix64 max)
+        {
+            if (value > max)
+                return max;
+            if (value < min)
+                return min;
+            return value;
+        }
 
-    public static float Min(float a, float b)
-    {
-      if (a < b)
-        return a;
-      return b;
-    }
+        public static Fix64 Max(Fix64 a, Fix64 b)
+        {
+            if (a > b)
+                return a;
+            return b;
+        }
 
-    public static float Sqrt(float a)
-    {
-      return (float)System.Math.Sqrt(a);
-    }
+        public static Fix64 Min(Fix64 a, Fix64 b)
+        {
+            if (a < b)
+                return a;
+            return b;
+        }
 
-    public static float Sin(float a)
-    {
-      return (float)System.Math.Sin(a);
-    }
+        public static Fix64 Sqrt(Fix64 a)
+        {
+            return Fix64.Sqrt(a);
+        }
 
-    public static float Cos(float a)
-    {
-      return (float)System.Math.Cos(a);
-    }
+        public static Fix64 Sin(Fix64 a)
+        {
+            return Fix64.Sin(a);
+        }
 
-    public static float Atan2(float a, float b)
-    {
-      return (float)System.Math.Atan2(a, b);
+        public static Fix64 Cos(Fix64 a)
+        {
+            return Fix64.Cos(a);
+        }
+
+        public static Fix64 Atan2(Fix64 a, Fix64 b)
+        {
+            return Fix64.Atan2(a, b);
+        }
+
+        public static int Round(Fix64 fix64)
+        {
+            return (int)Fix64.Round(fix64);
+        }
     }
-  }
 }
 #endif

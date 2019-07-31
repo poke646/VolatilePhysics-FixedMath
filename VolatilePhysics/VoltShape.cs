@@ -22,6 +22,8 @@
 using UnityEngine;
 #endif
 
+using FixMath.NET;
+
 namespace Volatile
 {
   public abstract class VoltShape
@@ -62,9 +64,9 @@ namespace Volatile
     public object UserData { get; set; }
     public VoltBody Body { get; private set; }
 
-    internal float Density { get; private set; }
-    internal float Friction { get; private set; }
-    internal float Restitution { get; private set; }
+    internal Fix64 Density { get; private set; }
+    internal Fix64 Friction { get; private set; }
+    internal Fix64 Restitution { get; private set; }
 
     /// <summary>
     /// The world-space bounding AABB for this shape.
@@ -74,17 +76,17 @@ namespace Volatile
     /// <summary>
     /// Total area of the shape.
     /// </summary>
-    public float Area { get; protected set; }
+    public Fix64 Area { get; protected set; }
 
     /// <summary>
     /// Total mass of the shape (area * density).
     /// </summary>
-    public float Mass { get; protected set; }
+    public Fix64 Mass { get; protected set; }
 
     /// <summary>
     /// Total inertia of the shape relative to the body's origin.
     /// </summary>
-    public float Inertia { get; protected set; }
+    public Fix64 Inertia { get; protected set; }
 
     // Body-space bounding AABB for pre-checks during queries/casts
     internal VoltAABB worldSpaceAABB;
@@ -120,7 +122,7 @@ namespace Volatile
     /// Checks if a circle overlaps with this shape. 
     /// Begins with an AABB check.
     /// </summary>
-    internal bool QueryCircle(Vector2 bodySpaceOrigin, float radius)
+    internal bool QueryCircle(Vector2 bodySpaceOrigin, Fix64 radius)
     {
       // Queries and casts on shapes are always done in body space
       if (this.bodySpaceAABB.QueryCircleApprox(bodySpaceOrigin, radius))
@@ -148,7 +150,7 @@ namespace Volatile
     /// </summary>
     internal bool CircleCast(
       ref VoltRayCast bodySpaceRay, 
-      float radius, 
+      Fix64 radius, 
       ref VoltRayResult result)
     {
       // Queries and casts on shapes are always done in body space
@@ -159,9 +161,9 @@ namespace Volatile
     #endregion
 
     protected void Initialize(
-      float density, 
-      float friction, 
-      float restitution)
+      Fix64 density, 
+      Fix64 friction, 
+      Fix64 restitution)
     {
       this.Density = density;
       this.Friction = friction;
@@ -181,13 +183,13 @@ namespace Volatile
       this.UserData = null;
       this.Body = null;
 
-      this.Density = 0.0f;
-      this.Friction = 0.0f;
-      this.Restitution = 0.0f;
+      this.Density = Fix64.Zero;
+      this.Friction = Fix64.Zero;
+      this.Restitution = Fix64.Zero;
 
-      this.Area = 0.0f;
-      this.Mass = 0.0f;
-      this.Inertia = 0.0f;
+      this.Area = Fix64.Zero;
+      this.Mass = Fix64.Zero;
+      this.Inertia = Fix64.Zero;
 
       this.bodySpaceAABB = default(VoltAABB);
       this.worldSpaceAABB = default(VoltAABB);
@@ -204,7 +206,7 @@ namespace Volatile
 
     protected abstract bool ShapeQueryCircle(
       Vector2 bodySpaceOrigin,
-      float radius);
+      Fix64 radius);
 
     protected abstract bool ShapeRayCast(
       ref VoltRayCast bodySpaceRay,
@@ -212,7 +214,7 @@ namespace Volatile
 
     protected abstract bool ShapeCircleCast(
       ref VoltRayCast bodySpaceRay,
-      float radius,
+      Fix64 radius,
       ref VoltRayResult result);
     #endregion
 
@@ -223,7 +225,7 @@ namespace Volatile
       Color normalColor,
       Color originColor,
       Color aabbColor,
-      float normalLength);
+      Fix64 normalLength);
 #endif
     #endregion
   }

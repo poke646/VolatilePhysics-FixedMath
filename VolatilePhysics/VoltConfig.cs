@@ -18,6 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using FixMath.NET;
 using System;
 using System.Collections.Generic;
 
@@ -29,21 +30,21 @@ namespace Volatile
 {
   public static class VoltConfig
   {
-    public static float ResolveSlop = 0.01f;
-    public static float ResolveRate = 0.1f;
-    public static float AreaMassRatio = 0.01f;
+    public static Fix64 ResolveSlop = (Fix64)0.01M;
+    public static Fix64 ResolveRate = (Fix64)0.1M;
+    public static Fix64 AreaMassRatio = (Fix64)0.01M;
 
     // Defaults
-    public const float DEFAULT_DENSITY = 1.0f;
-    public const float DEFAULT_RESTITUTION = 0.5f;
-    public const float DEFAULT_FRICTION = 0.8f;
+    public static readonly Fix64 DEFAULT_DENSITY = Fix64.One;
+    public static readonly Fix64 DEFAULT_RESTITUTION = (Fix64)0.5M;
+    public static readonly Fix64 DEFAULT_FRICTION = (Fix64)0.8M;
 
-    internal const float DEFAULT_DELTA_TIME = 0.02f;
-    internal const float DEFAULT_DAMPING = 0.999f;
+    internal static readonly Fix64 DEFAULT_DELTA_TIME = (Fix64)0.02M;
+    internal static readonly Fix64 DEFAULT_DAMPING = (Fix64)0.999M;
     internal const int DEFAULT_ITERATION_COUNT = 20;
 
     // AABB extension for the dynamic tree
-    internal const float AABB_EXTENSION = 0.2f;
+    internal static readonly Fix64 AABB_EXTENSION = (Fix64)0.2M;
 
     // Maximum contacts for collision resolution.
     internal const int MAX_CONTACTS = 3;
@@ -53,6 +54,6 @@ namespace Volatile
 
     // The minimum mass a dynamic object can have before it is
     // converted to a static object
-    internal const float MINIMUM_DYNAMIC_MASS = 0.00001f;
+    internal static readonly Fix64 MINIMUM_DYNAMIC_MASS = (Fix64)0.00001M;
   }
 }

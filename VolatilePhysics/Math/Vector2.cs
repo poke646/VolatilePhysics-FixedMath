@@ -18,76 +18,76 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
-#if !UNITY
+using FixMath.NET;
+
 namespace Volatile
 {
-  public struct Vector2
-  {
-    public static Vector2 zero { get { return new Vector2(0.0f, 0.0f); } }
-
-    public static float Dot(Vector2 a, Vector2 b)
+    public struct Vector2
     {
-      return (a.x * b.x) + (a.y * b.y);
-    }
+        public readonly Fix64 x;
+        public readonly Fix64 y;
 
-    public readonly float x;
-    public readonly float y;
+        public static Vector2 zero => new Vector2();
 
-    public float sqrMagnitude
-    {
-      get
-      {
-        return (this.x * this.x) + (this.y * this.y);
-      }
-    }
+        public static Fix64 Dot(Vector2 a, Vector2 b)
+        {
+            return (a.x * b.x) + (a.y * b.y);
+        }
 
-    public float magnitude 
-    { 
-      get 
-      {
-        return Mathf.Sqrt(this.sqrMagnitude);
-      } 
-    }
+        public Fix64 sqrMagnitude
+        {
+            get
+            {
+                return (this.x * this.x) + (this.y * this.y);
+            }
+        }
 
-    public Vector2 normalized
-    {
-      get
-      {
-        float magnitude = this.magnitude;
-        return new Vector2(this.x / magnitude, this.y / magnitude);
-      }
-    }
+        public Fix64 magnitude
+        {
+            get
+            {
+                return Mathf.Sqrt(this.sqrMagnitude);
+            }
+        }
 
-    public Vector2 (float x, float y)
-    {
-      this.x = x;
-      this.y = y;
-    }
+        public Vector2 normalized
+        {
+            get
+            {
+                Fix64 magnitude = this.magnitude;
+                return new Vector2(this.x / magnitude, this.y / magnitude);
+            }
+        }
 
-    public static Vector2 operator *(Vector2 a, float b)
-    {
-      return new Vector2(a.x * b, a.y * b);
-    }
+        public Vector2(Fix64 x, Fix64 y)
+        {
+            this.x = x;
+            this.y = y;
+        }
 
-    public static Vector2 operator *(float a, Vector2 b)
-    {
-      return new Vector2(b.x * a, b.y * a);
-    }
+        public static Vector2 operator *(Vector2 a, Fix64 b)
+        {
+            return new Vector2(a.x * b, a.y * b);
+        }
 
-    public static Vector2 operator +(Vector2 a, Vector2 b)
-    {
-      return new Vector2(a.x + b.x, a.y + b.y);
-    }
+        public static Vector2 operator *(Fix64 a, Vector2 b)
+        {
+            return new Vector2(b.x * a, b.y * a);
+        }
 
-    public static Vector2 operator -(Vector2 a, Vector2 b)
-    {
-      return new Vector2(a.x - b.x, a.y - b.y);
-    }
+        public static Vector2 operator +(Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.x + b.x, a.y + b.y);
+        }
 
-    public static Vector2 operator -(Vector2 a)
-    {
-      return new Vector2(-a.x, -a.y);
+        public static Vector2 operator -(Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.x - b.x, a.y - b.y);
+        }
+
+        public static Vector2 operator -(Vector2 a)
+        {
+            return new Vector2(-a.x, -a.y);
+        }
     }
-  }
 }
-#endif

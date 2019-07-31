@@ -18,6 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using FixMath.NET;
 using System;
 
 #if UNITY
@@ -29,7 +30,7 @@ namespace Volatile
   public delegate void VoltExplosionCallback(
     VoltRayCast rayCast,
     VoltRayResult rayResult,
-    float rayWeight);
+    Fix64 rayWeight);
 
   public partial class VoltWorld
   {
@@ -37,14 +38,14 @@ namespace Volatile
     // This way, if an occluder is also a target, we will catch that target
     // within the occluder range. Also allows us to handle the case where the
     // explosion origin is within both targets' and occluders' shapes.
-    private const float EXPLOSION_OCCLUDER_SLOP = 0.05f;
+    private static readonly Fix64 EXPLOSION_OCCLUDER_SLOP = (Fix64)0.05M;
 
     private VoltBuffer<VoltBody> targetBodies;
     private VoltBuffer<VoltBody> occludingBodies;
 
     public void PerformExplosion(
       Vector2 origin,
-      float radius,
+      Fix64 radius,
       VoltExplosionCallback callback,
       VoltBodyFilter targetFilter = null,
       VoltBodyFilter occlusionFilter = null,
@@ -71,15 +72,15 @@ namespace Volatile
         ref this.occludingBodies);
 
       VoltRayCast ray;
-      float rayWeight = 1.0f / rayCount;
-      float angleIncrement = (Mathf.PI * 2.0f) * rayWeight;
+      Fix64 rayWeight = Fix64.One / (Fix64)rayCount;
+      Fix64 angleIncrement = Fix64.PiTimes2 * rayWeight;
 
       for (int i = 0; i < rayCount; i++)
       {
-        Vector2 normal = VoltMath.Polar(angleIncrement * i);
+        Vector2 normal = VoltMath.Polar(angleIncrement * (Fix64)i);
         ray = new VoltRayCast(origin, normal, radius);
 
-        float minDistance = 
+        Fix64 minDistance = 
           this.GetOccludingDistance(ray, ticksBehind);
         minDistance += VoltWorld.EXPLOSION_OCCLUDER_SLOP;
 
@@ -90,11 +91,11 @@ namespace Volatile
     /// <summary>
     /// Gets the distance to the closest occluder for the given ray.
     /// </summary>
-    private float GetOccludingDistance(
+    private Fix64 GetOccludingDistance(
       VoltRayCast ray,
       int ticksBehind)
     {
-      float distance = float.MaxValue;
+      Fix64 distance = Fix64.MaxValue;
       VoltRayResult result = default(VoltRayResult);
 
       for (int i = 0; i < this.occludingBodies.Count; i++)
@@ -115,8 +116,8 @@ namespace Volatile
       VoltRayCast ray,
       VoltExplosionCallback callback,
       int ticksBehind,
-      float minOccluderDistance,
-      float rayWeight)
+      Fix64 minOccluderDistance,
+      Fix64 rayWeight)
     {
       for (int i = 0; i < this.targetBodies.Count; i++)
       {
@@ -135,7 +136,7 @@ namespace Volatile
     /// </summary>
     private void PopulateFiltered(
       Vector2 origin,
-      float radius,
+      Fix64 radius,
       VoltBodyFilter targetFilter,
       int ticksBehind,
       ref VoltBuffer<VoltBody> filterBuffer)

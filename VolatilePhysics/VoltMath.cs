@@ -18,6 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using FixMath.NET;
 using System;
 using System.Collections.Generic;
 
@@ -83,22 +84,22 @@ namespace Volatile
       return new Vector2(v.x * b.x + v.y * b.y, v.y * b.x - v.x * b.y);
     }
 
-    public static float Angle(this Vector2 v)
+    public static Fix64 Angle(this Vector2 v)
     {
       return Mathf.Atan2(v.y, v.x);
     }
 
-    public static Vector2 Polar(float radians)
+    public static Vector2 Polar(Fix64 radians)
     {
       return new Vector2(Mathf.Cos(radians), Mathf.Sin(radians));
     }
 
-    public static float Cross(Vector2 a, Vector2 b)
+    public static Fix64 Cross(Vector2 a, Vector2 b)
     {
       return a.x * b.y - a.y * b.x;
     }
 
-    public static float Square(float a)
+    public static Fix64 Square(Fix64 a)
     {
       return a * a;
     }

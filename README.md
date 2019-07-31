@@ -1,3 +1,9 @@
+This is the deterministic fork of ashoulson/VolatilePhysics, built for .NET Standard
+
+Used [FixedMath.Net](https://github.com/asik/FixedMath.Net) for deterministic mathmatics
+
+---
+
 **VolatilePhysics: A 2D Physics Library for Networked Games**
 
 Alexander Shoulson, Ph.D. - http://ashoulson.com

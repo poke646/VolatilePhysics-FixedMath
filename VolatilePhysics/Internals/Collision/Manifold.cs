@@ -22,6 +22,8 @@
 using UnityEngine;
 #endif
 
+using FixMath.NET;
+
 namespace Volatile
 {
   internal sealed class Manifold
@@ -34,8 +36,8 @@ namespace Volatile
 
     internal VoltShape ShapeA { get; private set; }
     internal VoltShape ShapeB { get; private set; }
-    internal float Restitution { get; private set; }
-    internal float Friction { get; private set; }
+    internal Fix64 Restitution { get; private set; }
+    internal Fix64 Friction { get; private set; }
 
     private readonly Contact[] contacts;
     private int used = 0;
@@ -67,7 +69,7 @@ namespace Volatile
     internal bool AddContact(
       Vector2 position,
       Vector2 normal,
-      float penetration)
+      Fix64 penetration)
     {
       if (this.used >= VoltConfig.MAX_CONTACTS)
         return false;
@@ -111,8 +113,8 @@ namespace Volatile
     {
       this.ShapeA = null;
       this.ShapeB = null;
-      this.Restitution = 0.0f;
-      this.Friction = 0.0f;
+      this.Restitution = Fix64.Zero;
+      this.Friction = Fix64.Zero;
 
       this.ClearContacts();
       this.world = null;

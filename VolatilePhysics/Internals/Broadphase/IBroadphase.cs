@@ -18,6 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using FixMath.NET;
 using System;
 using System.Collections.Generic;
 
@@ -39,8 +40,8 @@ namespace Volatile
     // narrowphase test.
     void QueryOverlap(VoltAABB aabb, VoltBuffer<VoltBody> outBuffer);
     void QueryPoint(Vector2 point, VoltBuffer<VoltBody> outBuffer);
-    void QueryCircle(Vector2 point, float radius, VoltBuffer<VoltBody> outBuffer);
+    void QueryCircle(Vector2 point, Fix64 radius, VoltBuffer<VoltBody> outBuffer);
     void RayCast(ref VoltRayCast ray, VoltBuffer<VoltBody> outBuffer);
-    void CircleCast(ref VoltRayCast ray, float radius, VoltBuffer<VoltBody> outBuffer);
+    void CircleCast(ref VoltRayCast ray, Fix64 radius, VoltBuffer<VoltBody> outBuffer);
   }
 }

@@ -18,6 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using FixMath.NET;
 using System;
 using System.Collections.Generic;
 
@@ -35,7 +36,7 @@ namespace Volatile
     internal readonly Vector2 origin;
     internal readonly Vector2 direction;
     internal readonly Vector2 invDirection;
-    internal readonly float distance;
+    internal readonly Fix64 distance;
     internal readonly bool signX;
     internal readonly bool signY;
 
@@ -46,21 +47,21 @@ namespace Volatile
       this.origin = origin;
       this.direction = delta.normalized;
       this.distance = delta.magnitude;
-      this.signX = direction.x < 0.0f;
-      this.signY = direction.y < 0.0f;
+      this.signX = direction.x < Fix64.Zero;
+      this.signY = direction.y < Fix64.Zero;
       this.invDirection = 
-        new Vector2(1.0f / direction.x, 1.0f / direction.y);
+        new Vector2(Fix64.One / direction.x, Fix64.One / direction.y);
     }
 
-    public VoltRayCast(Vector2 origin, Vector2 direction, float distance)
+    public VoltRayCast(Vector2 origin, Vector2 direction, Fix64 distance)
     {
       this.origin = origin;
       this.direction = direction;
       this.distance = distance;
-      this.signX = direction.x < 0.0f;
-      this.signY = direction.y < 0.0f;
+      this.signX = direction.x < Fix64.Zero;
+      this.signY = direction.y < Fix64.Zero;
       this.invDirection = 
-        new Vector2(1.0f / direction.x, 1.0f / direction.y);
+        new Vector2(Fix64.One / direction.x, Fix64.One / direction.y);
     }
   }
 }

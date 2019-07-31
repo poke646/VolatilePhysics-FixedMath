@@ -18,6 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using FixMath.NET;
 using System;
 using System.Collections.Generic;
 
@@ -32,7 +33,7 @@ namespace Volatile
     public bool IsValid { get { return this.shape != null; } }
     public bool IsContained
     {
-      get { return this.IsValid && this.distance == 0.0f; }
+      get { return this.IsValid && this.distance == Fix64.Zero; }
     }
 
     public VoltShape Shape { get { return this.shape; } }
@@ -42,11 +43,11 @@ namespace Volatile
       get { return (this.shape == null) ? null : this.shape.Body; } 
     }
 
-    public float Distance { get { return this.distance; } }
+    public Fix64 Distance { get { return this.distance; } }
     public Vector2 Normal { get { return this.normal; } }
 
     private VoltShape shape;
-    private float distance;
+    private Fix64 distance;
     internal Vector2 normal;
 
     public Vector2 ComputePoint(ref VoltRayCast cast)
@@ -56,7 +57,7 @@ namespace Volatile
 
     internal void Set(
       VoltShape shape,
-      float distance,
+      Fix64 distance,
       Vector2 normal)
     {
       if (this.IsValid == false || distance < this.distance)
@@ -75,7 +76,7 @@ namespace Volatile
     internal void SetContained(VoltShape shape)
     {
       this.shape = shape;
-      this.distance = 0.0f;
+      this.distance = Fix64.Zero;
       this.normal = Vector2.zero;
     }
   }

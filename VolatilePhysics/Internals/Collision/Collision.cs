@@ -22,6 +22,8 @@
 using UnityEngine;
 #endif
 
+using FixMath.NET;
+
 namespace Volatile
 {
   internal static class Collision
@@ -101,7 +103,7 @@ namespace Volatile
       VoltPolygon poly)
     {
       // Get the axis on the polygon closest to the circle's origin
-      float penetration;
+      Fix64 penetration;
       int index =
         Collision.FindAxisMaxPenetration(
           circ.worldSpaceOrigin,
@@ -118,16 +120,16 @@ namespace Volatile
 
       // If the circle is past one of the two vertices, check it like
       // a circle-circle intersection where the vertex has radius 0
-      float d = VoltMath.Cross(axis.Normal, circ.worldSpaceOrigin);
+      Fix64 d = VoltMath.Cross(axis.Normal, circ.worldSpaceOrigin);
       if (d > VoltMath.Cross(axis.Normal, a))
-        return Collision.TestCircles(world, circ, poly, a, 0.0f);
+        return Collision.TestCircles(world, circ, poly, a, Fix64.Zero);
       if (d < VoltMath.Cross(axis.Normal, b))
-        return Collision.TestCircles(world, circ, poly, b, 0.0f);
+        return Collision.TestCircles(world, circ, poly, b, Fix64.Zero);
 
       // Build the collision Manifold
       Manifold manifold = world.AllocateManifold().Assign(world, circ, poly);
       Vector2 pos =
-        circ.worldSpaceOrigin - (circ.radius + penetration / 2) * axis.Normal;
+        circ.worldSpaceOrigin - (circ.radius + penetration / (Fix64)2) * axis.Normal;
       manifold.AddContact(pos, -axis.Normal, penetration);
       return manifold;
     }
@@ -165,7 +167,7 @@ namespace Volatile
     internal static bool TestPointCircleSimple(
       Vector2 point,
       Vector2 origin,
-      float radius)
+      Fix64 radius)
     {
       Vector2 delta = origin - point;
       return delta.sqrMagnitude <= (radius * radius);
@@ -177,10 +179,10 @@ namespace Volatile
     internal static bool TestCircleCircleSimple(
       Vector2 originA,
       Vector2 originB,
-      float radiusA,
-      float radiusB)
+      Fix64 radiusA,
+      Fix64 radiusB)
     {
-      float radiusTotal = radiusA + radiusB;
+      Fix64 radiusTotal = radiusA + radiusB;
       return (originA - originB).sqrMagnitude <= (radiusTotal * radiusTotal);
     }
 
@@ -190,7 +192,7 @@ namespace Volatile
     internal static bool CircleRayCast(
       VoltShape shape,
       Vector2 shapeOrigin,
-      float sqrRadius,
+      Fix64 sqrRadius,
       ref VoltRayCast ray,
       ref VoltRayResult result)
     {
@@ -202,17 +204,17 @@ namespace Volatile
         return true;
       }
 
-      float slope = Vector2.Dot(toOrigin, ray.direction);
-      if (slope < 0)
+      Fix64 slope = Vector2.Dot(toOrigin, ray.direction);
+      if (slope < Fix64.Zero)
         return false;
 
-      float sqrSlope = slope * slope;
-      float d = sqrRadius + sqrSlope - Vector2.Dot(toOrigin, toOrigin);
-      if (d < 0)
+      Fix64 sqrSlope = slope * slope;
+      Fix64 d = sqrRadius + sqrSlope - Vector2.Dot(toOrigin, toOrigin);
+      if (d < Fix64.Zero)
         return false;
 
-      float dist = slope - Mathf.Sqrt(d);
-      if (dist < 0 || dist > ray.distance)
+      Fix64 dist = slope - Mathf.Sqrt(d);
+      if (dist < Fix64.Zero || dist > ray.distance)
         return false;
 
       // N.B.: For historical raycasts this normal will be wrong!
@@ -230,18 +232,18 @@ namespace Volatile
     internal static int FindAxisShortestDistance(
       Vector2 point,
       Axis[] axes,
-      out float minDistance)
+      out Fix64 minDistance)
     {
       int ix = 0;
-      minDistance = float.PositiveInfinity;
+      minDistance = Fix64.MaxValue;
       bool inside = true;
 
       for (int i = 0; i < axes.Length; i++)
       {
-        float dot = Vector2.Dot(axes[i].Normal, point);
-        float dist = axes[i].Width - dot;
+        Fix64 dot = Vector2.Dot(axes[i].Normal, point);
+        Fix64 dist = axes[i].Width - dot;
 
-        if (dist < 0.0f)
+        if (dist < Fix64.Zero)
           inside = false;
 
         if (dist < minDistance)
@@ -253,7 +255,7 @@ namespace Volatile
 
       if (inside == true)
       {
-        minDistance = 0.0f;
+        minDistance = Fix64.Zero;
         ix = -1;
       }
 
@@ -267,21 +269,21 @@ namespace Volatile
     /// </summary>
     internal static int FindAxisMaxPenetration(
       Vector2 origin,
-      float radius,
+      Fix64 radius,
       VoltPolygon poly,
-      out float penetration)
+      out Fix64 penetration)
     {
       int index = 0;
       int found = 0;
-      penetration = float.NegativeInfinity;
+      penetration = Fix64.MinValue;
 
       for (int i = 0; i < poly.countWorld; i++)
       {
         Axis axis = poly.worldAxes[i];
-        float dot = Vector2.Dot(axis.Normal, origin);
-        float dist = dot - axis.Width - radius;
+        Fix64 dot = Vector2.Dot(axis.Normal, origin);
+        Fix64 dist = dot - axis.Width - radius;
 
-        if (dist > 0)
+        if (dist > Fix64.Zero)
           return -1;
 
         if (dist > penetration)
@@ -308,21 +310,23 @@ namespace Volatile
       VoltCircle shapeA,
       VoltShape shapeB,
       Vector2 overrideBCenter, // For testing vertices in circles
-      float overrideBRadius)
+      Fix64 overrideBRadius)
     {
       Vector2 r = overrideBCenter - shapeA.worldSpaceOrigin;
-      float min = shapeA.radius + overrideBRadius;
-      float distSq = r.sqrMagnitude;
+      Fix64 min = shapeA.radius + overrideBRadius;
+      Fix64 distSq = r.sqrMagnitude;
 
       if (distSq >= min * min)
         return null;
 
-      float dist = Mathf.Sqrt(distSq);
-      float distInv = 1.0f / dist;
+      Fix64 dist = Mathf.Sqrt(distSq);
+
+      // 최소값을 지정하여 divide by zero 방지
+      Fix64 distInv = Fix64.One / Mathf.Max(dist, min / (Fix64)10);
 
       Vector2 pos =
         shapeA.worldSpaceOrigin +
-        (0.5f + distInv * (shapeA.radius - min / 2.0f)) * r;
+        (Fix64.One / (Fix64)2 + distInv * (shapeA.radius - min / (Fix64)2)) * r;
 
       // Build the collision Manifold
       Manifold manifold = 
@@ -336,12 +340,12 @@ namespace Volatile
       VoltPolygon poly2,
       out Axis axis)
     {
-      axis = new Axis(Vector2.zero, float.NegativeInfinity);
+      axis = new Axis(Vector2.zero, Fix64.MinValue);
 
       for (int i = 0; i < poly1.countWorld; i++)
       {
         Axis a = poly1.worldAxes[i];
-        float min = float.PositiveInfinity;
+        Fix64 min = Fix64.MaxValue;
         for (int j = 0; j < poly2.countWorld; j++)
         {
           Vector2 v = poly2.worldVertices[j];
@@ -349,7 +353,7 @@ namespace Volatile
         }
         min -= a.Width;
 
-        if (min > 0)
+        if (min > Fix64.Zero)
           return false;
         if (min > axis.Width)
           axis = new Axis(a.Normal, min);
@@ -369,7 +373,7 @@ namespace Volatile
       VoltPolygon poly1,
       VoltPolygon poly2,
       Vector2 normal,
-      float penetration,
+      Fix64 penetration,
       Manifold manifold)
     {
       bool found = false;
@@ -408,7 +412,7 @@ namespace Volatile
       VoltPolygon poly1,
       VoltPolygon poly2,
       Vector2 normal,
-      float penetration,
+      Fix64 penetration,
       Manifold manifold)
     {
       for (int i = 0; i < poly1.countWorld; i++)

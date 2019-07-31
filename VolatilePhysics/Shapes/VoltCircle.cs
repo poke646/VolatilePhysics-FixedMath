@@ -18,6 +18,7 @@
  *  3. This notice may not be removed or altered from any source distribution.
 */
 
+using FixMath.NET;
 using System;
 using System.Collections.Generic;
 
@@ -32,10 +33,10 @@ namespace Volatile
     #region Factory Functions
     internal void InitializeFromWorldSpace(
       Vector2 worldSpaceOrigin, 
-      float radius,
-      float density,
-      float friction,
-      float restitution)
+      Fix64 radius,
+      Fix64 density,
+      Fix64 friction,
+      Fix64 restitution)
     {
       base.Initialize(density, friction, restitution);
 
@@ -50,13 +51,13 @@ namespace Volatile
     public override VoltShape.ShapeType Type { get { return ShapeType.Circle; } }
 
     public Vector2 Origin { get { return this.worldSpaceOrigin; } }
-    public float Radius { get { return this.radius; } }
+    public Fix64 Radius { get { return this.radius; } }
     #endregion
 
     #region Fields
     internal Vector2 worldSpaceOrigin;
-    internal float radius;
-    internal float sqrRadius;
+    internal Fix64 radius;
+    internal Fix64 sqrRadius;
 
     // Precomputed body-space values (these should never change unless we
     // want to support moving shapes relative to their body root later on)
@@ -73,8 +74,8 @@ namespace Volatile
       base.Reset();
 
       this.worldSpaceOrigin = Vector2.zero;
-      this.radius = 0.0f;
-      this.sqrRadius = 0.0f;
+      this.radius = Fix64.Zero;
+      this.sqrRadius = Fix64.Zero;
       this.bodySpaceOrigin = Vector2.zero;
     }
 
@@ -88,7 +89,7 @@ namespace Volatile
       this.Area = this.sqrRadius * Mathf.PI;
       this.Mass = this.Area * this.Density * VoltConfig.AreaMassRatio;
       this.Inertia =
-        this.sqrRadius / 2.0f + this.bodySpaceOrigin.sqrMagnitude;
+        this.sqrRadius / (Fix64)2 + this.bodySpaceOrigin.sqrMagnitude;
     }
 
     protected override void ApplyBodyPosition()
@@ -112,7 +113,7 @@ namespace Volatile
 
     protected override bool ShapeQueryCircle(
       Vector2 bodySpaceOrigin, 
-      float radius)
+      Fix64 radius)
     {
       return 
         Collision.TestCircleCircleSimple(
@@ -136,10 +137,10 @@ namespace Volatile
 
     protected override bool ShapeCircleCast(
       ref VoltRayCast bodySpaceRay, 
-      float radius,
+      Fix64 radius,
       ref VoltRayResult result)
     {
-      float totalRadius = this.radius + radius;
+      Fix64 totalRadius = this.radius + radius;
       return Collision.CircleRayCast(
         this,
         this.bodySpaceOrigin,
@@ -156,7 +157,7 @@ namespace Volatile
       Color normalColor, 
       Color originColor, 
       Color aabbColor, 
-      float normalLength)
+      Fix64 normalLength)
     {
       Color current = Gizmos.color;
 
