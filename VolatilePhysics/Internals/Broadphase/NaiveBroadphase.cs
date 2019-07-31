@@ -81,14 +81,14 @@ namespace Volatile
     }
 
     public void QueryPoint(
-      Vector2 point,
+      VoltVector2 point,
       VoltBuffer<VoltBody> outBuffer)
     {
       outBuffer.Add(this.bodies, this.count);
     }
 
     public void QueryCircle(
-      Vector2 point,
+      VoltVector2 point,
       Fix64 radius,
       VoltBuffer<VoltBody> outBuffer)
     {

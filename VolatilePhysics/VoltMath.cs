@@ -28,80 +28,132 @@ using UnityEngine;
 
 namespace Volatile
 {
-  public static class VoltMath
-  {
-    #region Transformations
-    public static Vector2 WorldToBodyPoint(
-      Vector2 bodyPosition,
-      Vector2 bodyFacing,
-      Vector2 vector)
+    public static class VoltMath
     {
-      return (vector - bodyPosition).InvRotate(bodyFacing);
-    }
+        #region Transformations
+        public static VoltVector2 WorldToBodyPoint(
+          VoltVector2 bodyPosition,
+          VoltVector2 bodyFacing,
+          VoltVector2 vector)
+        {
+            return (vector - bodyPosition).InvRotate(bodyFacing);
+        }
 
-    public static Vector2 WorldToBodyDirection(
-      Vector2 bodyFacing,
-      Vector2 vector)
-    {
-      return vector.InvRotate(bodyFacing);
-    }
-    #endregion
+        public static VoltVector2 WorldToBodyDirection(
+          VoltVector2 bodyFacing,
+          VoltVector2 vector)
+        {
+            return vector.InvRotate(bodyFacing);
+        }
+        #endregion
 
-    #region Body-Space to World-Space Transformations
-    public static Vector2 BodyToWorldPoint(
-      Vector2 bodyPosition,
-      Vector2 bodyFacing,
-      Vector2 vector)
-    {
-      return vector.Rotate(bodyFacing) + bodyPosition;
-    }
+        #region Body-Space to World-Space Transformations
+        public static VoltVector2 BodyToWorldPoint(
+          VoltVector2 bodyPosition,
+          VoltVector2 bodyFacing,
+          VoltVector2 vector)
+        {
+            return vector.Rotate(bodyFacing) + bodyPosition;
+        }
 
-    public static Vector2 BodyToWorldDirection(
-      Vector2 bodyFacing,
-      Vector2 vector)
-    {
-      return vector.Rotate(bodyFacing);
-    }
-    #endregion
+        public static VoltVector2 BodyToWorldDirection(
+          VoltVector2 bodyFacing,
+          VoltVector2 vector)
+        {
+            return vector.Rotate(bodyFacing);
+        }
+        #endregion
 
-    public static Vector2 Right(this Vector2 v)
-    {
-      return new Vector2(v.y, -v.x);
-    }
+        public static VoltVector2 Right(this VoltVector2 v)
+        {
+            return new VoltVector2(v.y, -v.x);
+        }
 
-    public static Vector2 Left(this Vector2 v)
-    {
-      return new Vector2(-v.y, v.x);
-    }
+        public static VoltVector2 Left(this VoltVector2 v)
+        {
+            return new VoltVector2(-v.y, v.x);
+        }
 
-    public static Vector2 Rotate(this Vector2 v, Vector2 b)
-    {
-      return new Vector2(v.x * b.x - v.y * b.y, v.y * b.x + v.x * b.y);
-    }
+        public static VoltVector2 Rotate(this VoltVector2 v, VoltVector2 b)
+        {
+            return new VoltVector2(v.x * b.x - v.y * b.y, v.y * b.x + v.x * b.y);
+        }
 
-    public static Vector2 InvRotate(this Vector2 v, Vector2 b)
-    {
-      return new Vector2(v.x * b.x + v.y * b.y, v.y * b.x - v.x * b.y);
-    }
+        public static VoltVector2 InvRotate(this VoltVector2 v, VoltVector2 b)
+        {
+            return new VoltVector2(v.x * b.x + v.y * b.y, v.y * b.x - v.x * b.y);
+        }
 
-    public static Fix64 Angle(this Vector2 v)
-    {
-      return Mathf.Atan2(v.y, v.x);
-    }
+        public static Fix64 Angle(this VoltVector2 v)
+        {
+            return VoltMath.Atan2(v.y, v.x);
+        }
 
-    public static Vector2 Polar(Fix64 radians)
-    {
-      return new Vector2(Mathf.Cos(radians), Mathf.Sin(radians));
-    }
+        public static VoltVector2 Polar(Fix64 radians)
+        {
+            return new VoltVector2(VoltMath.Cos(radians), VoltMath.Sin(radians));
+        }
 
-    public static Fix64 Cross(Vector2 a, Vector2 b)
-    {
-      return a.x * b.y - a.y * b.x;
-    }
+        public static Fix64 Cross(VoltVector2 a, VoltVector2 b)
+        {
+            return a.x * b.y - a.y * b.x;
+        }
 
-    public static Fix64 Square(Fix64 a)
-    {
-      return a * a;
+        public static Fix64 Square(Fix64 a)
+        {
+            return a * a;
+        }
+
+        #region Mathf
+        public static readonly Fix64 PI = Fix64.Pi;
+
+        public static Fix64 Clamp(Fix64 value, Fix64 min, Fix64 max)
+        {
+            if (value > max)
+                return max;
+            if (value < min)
+                return min;
+            return value;
+        }
+
+        public static Fix64 Max(Fix64 a, Fix64 b)
+        {
+            if (a > b)
+                return a;
+            return b;
+        }
+
+        public static Fix64 Min(Fix64 a, Fix64 b)
+        {
+            if (a < b)
+                return a;
+            return b;
+        }
+
+        public static Fix64 Sqrt(Fix64 a)
+        {
+            return Fix64.Sqrt(a);
+        }
+
+        public static Fix64 Sin(Fix64 a)
+        {
+            return Fix64.Sin(a);
+        }
+
+        public static Fix64 Cos(Fix64 a)
+        {
+            return Fix64.Cos(a);
+        }
+
+        public static Fix64 Atan2(Fix64 a, Fix64 b)
+        {
+            return Fix64.Atan2(a, b);
+        }
+
+        public static int Round(Fix64 fix64)
+        {
+            return (int)Fix64.Round(fix64);
+        }
+        #endregion
     }
-  }
 }

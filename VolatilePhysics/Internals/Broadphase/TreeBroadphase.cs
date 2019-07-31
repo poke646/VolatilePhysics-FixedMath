@@ -301,7 +301,7 @@ namespace Volatile
     }
 
     public void QueryPoint(
-      Vector2 point,
+      VoltVector2 point,
       VoltBuffer<VoltBody> outBuffer)
     {
       this.StartQuery(outBuffer);
@@ -314,7 +314,7 @@ namespace Volatile
     }
 
     public void QueryCircle(
-      Vector2 point, 
+      VoltVector2 point, 
       Fix64 radius,
       VoltBuffer<VoltBody> outBuffer)
     {

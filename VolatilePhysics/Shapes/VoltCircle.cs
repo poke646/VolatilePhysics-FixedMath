@@ -32,7 +32,7 @@ namespace Volatile
   {
     #region Factory Functions
     internal void InitializeFromWorldSpace(
-      Vector2 worldSpaceOrigin, 
+      VoltVector2 worldSpaceOrigin, 
       Fix64 radius,
       Fix64 density,
       Fix64 friction,
@@ -50,18 +50,18 @@ namespace Volatile
     #region Properties
     public override VoltShape.ShapeType Type { get { return ShapeType.Circle; } }
 
-    public Vector2 Origin { get { return this.worldSpaceOrigin; } }
+    public VoltVector2 Origin { get { return this.worldSpaceOrigin; } }
     public Fix64 Radius { get { return this.radius; } }
     #endregion
 
     #region Fields
-    internal Vector2 worldSpaceOrigin;
+    internal VoltVector2 worldSpaceOrigin;
     internal Fix64 radius;
     internal Fix64 sqrRadius;
 
     // Precomputed body-space values (these should never change unless we
     // want to support moving shapes relative to their body root later on)
-    private Vector2 bodySpaceOrigin;
+    private VoltVector2 bodySpaceOrigin;
     #endregion
 
     public VoltCircle() 
@@ -73,10 +73,10 @@ namespace Volatile
     {
       base.Reset();
 
-      this.worldSpaceOrigin = Vector2.zero;
+      this.worldSpaceOrigin = VoltVector2.zero;
       this.radius = Fix64.Zero;
       this.sqrRadius = Fix64.Zero;
-      this.bodySpaceOrigin = Vector2.zero;
+      this.bodySpaceOrigin = VoltVector2.zero;
     }
 
     #region Functionality Overrides
@@ -86,7 +86,7 @@ namespace Volatile
         this.Body.WorldToBodyPointCurrent(this.worldSpaceOrigin);
       this.bodySpaceAABB = new VoltAABB(this.bodySpaceOrigin, this.radius);
 
-      this.Area = this.sqrRadius * Mathf.PI;
+      this.Area = this.sqrRadius * VoltMath.PI;
       this.Mass = this.Area * this.Density * VoltConfig.AreaMassRatio;
       this.Inertia =
         this.sqrRadius / (Fix64)2 + this.bodySpaceOrigin.sqrMagnitude;
@@ -102,7 +102,7 @@ namespace Volatile
 
     #region Test Overrides
     protected override bool ShapeQueryPoint(
-      Vector2 bodySpacePoint)
+      VoltVector2 bodySpacePoint)
     {
       return 
         Collision.TestPointCircleSimple(
@@ -112,7 +112,7 @@ namespace Volatile
     }
 
     protected override bool ShapeQueryCircle(
-      Vector2 bodySpaceOrigin, 
+      VoltVector2 bodySpaceOrigin, 
       Fix64 radius)
     {
       return 

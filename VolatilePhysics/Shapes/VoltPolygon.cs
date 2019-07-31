@@ -32,7 +32,7 @@ namespace Volatile
   {
     #region Factory Functions
     internal void InitializeFromWorldVertices(
-      Vector2[] vertices,
+      VoltVector2[] vertices,
       Fix64 density,
       Fix64 friction,
       Fix64 restitution)
@@ -50,7 +50,7 @@ namespace Volatile
     }
 
     internal void InitializeFromBodyVertices(
-      Vector2[] vertices,
+      VoltVector2[] vertices,
       Fix64 density,
       Fix64 friction,
       Fix64 restitution)
@@ -73,8 +73,8 @@ namespace Volatile
     #region Static Helpers
     private static void WorldToBody(
       VoltBody body,
-      Vector2[] worldVertices, 
-      Vector2[] bodyVertices, 
+      VoltVector2[] worldVertices, 
+      VoltVector2[] bodyVertices, 
       int count)
     {
       for (int i = 0; i < count; i++)
@@ -82,7 +82,7 @@ namespace Volatile
     }
 
     private static void ComputeAxes(
-      Vector2[] vertices,
+      VoltVector2[] vertices,
       int count,
       ref Axis[] destination)
     {
@@ -91,15 +91,15 @@ namespace Volatile
 
       for (int i = 0; i < count; i++)
       {
-        Vector2 u = vertices[i];
-        Vector2 v = vertices[(i + 1) % count];
-        Vector2 normal = (v - u).Left().normalized;
-        destination[i] = new Axis(normal, Vector2.Dot(normal, u));
+        VoltVector2 u = vertices[i];
+        VoltVector2 v = vertices[(i + 1) % count];
+        VoltVector2 normal = (v - u).Left().normalized;
+        destination[i] = new Axis(normal, VoltVector2.Dot(normal, u));
       }
     }
 
     private static VoltAABB ComputeBounds(
-      Vector2[] vertices,
+      VoltVector2[] vertices,
       int count)
     {
       Fix64 top = vertices[0].y;
@@ -109,10 +109,10 @@ namespace Volatile
 
       for (int i = 1; i < count; i++)
       {
-        top = Mathf.Max(top, vertices[i].y);
-        bottom = Mathf.Min(bottom, vertices[i].y);
-        left = Mathf.Min(left, vertices[i].x);
-        right = Mathf.Max(right, vertices[i].x);
+        top = VoltMath.Max(top, vertices[i].y);
+        bottom = VoltMath.Min(bottom, vertices[i].y);
+        left = VoltMath.Min(left, vertices[i].x);
+        right = VoltMath.Max(right, vertices[i].x);
       }
 
       return new VoltAABB(top, bottom, left, right);
@@ -124,13 +124,13 @@ namespace Volatile
     #endregion
 
     #region Fields
-    internal Vector2[] worldVertices;
+    internal VoltVector2[] worldVertices;
     internal Axis[] worldAxes;
     internal int countWorld;
 
     // Precomputed body-space values (these should never change unless we
     // want to support moving shapes relative to their body root later on)
-    internal Vector2[] bodyVertices;
+    internal VoltVector2[] bodyVertices;
     internal Axis[] bodyAxes;
     internal int countBody;
     #endregion
@@ -188,19 +188,19 @@ namespace Volatile
 
     #region Test Overrides
     protected override bool ShapeQueryPoint(
-      Vector2 bodySpacePoint)
+      VoltVector2 bodySpacePoint)
     {
       for (int i = 0; i < this.countBody; i++)
       {
         Axis axis = this.bodyAxes[i];
-        if (Vector2.Dot(axis.Normal, bodySpacePoint) > axis.Width)
+        if (VoltVector2.Dot(axis.Normal, bodySpacePoint) > axis.Width)
           return false;
       }
       return true;
     }
 
     protected override bool ShapeQueryCircle(
-      Vector2 bodySpaceOrigin,
+      VoltVector2 bodySpaceOrigin,
       Fix64 radius)
     {
       // Get the axis on the polygon closest to the circle's origin
@@ -216,8 +216,8 @@ namespace Volatile
         return false;
 
       int numVertices = this.countBody;
-      Vector2 a = this.bodyVertices[foundIndex];
-      Vector2 b = this.bodyVertices[(foundIndex + 1) % numVertices];
+      VoltVector2 a = this.bodyVertices[foundIndex];
+      VoltVector2 b = this.bodyVertices[(foundIndex + 1) % numVertices];
       Axis axis = this.bodyAxes[foundIndex];
 
       // If the circle is past one of the two vertices, check it like
@@ -246,7 +246,7 @@ namespace Volatile
         // Distance between the ray origin and the axis/edge along the 
         // normal (i.e., shortest distance between ray origin and the edge)
         Fix64 proj = 
-          Vector2.Dot(curAxis.Normal, bodySpaceRay.origin) - curAxis.Width;
+          VoltVector2.Dot(curAxis.Normal, bodySpaceRay.origin) - curAxis.Width;
 
         // See if the point is outside of any of the axes
         if (proj > Fix64.Zero)
@@ -254,7 +254,7 @@ namespace Volatile
 
         // Projection of the ray direction onto the axis normal (use 
         // negative normal because we want to get the penetration length)
-        Fix64 slope = Vector2.Dot(-curAxis.Normal, bodySpaceRay.direction);
+        Fix64 slope = VoltVector2.Dot(-curAxis.Normal, bodySpaceRay.direction);
 
         if (slope == Fix64.Zero)
           continue;
@@ -330,7 +330,7 @@ namespace Volatile
     /// <summary>
     /// Gets the vertices defining an edge of the polygon.
     /// </summary>
-    internal void GetEdge(int indexFirst, out Vector2 a, out Vector2 b)
+    internal void GetEdge(int indexFirst, out VoltVector2 a, out VoltVector2 b)
     {
       a = this.worldVertices[indexFirst];
       b = this.worldVertices[(indexFirst + 1) % this.countWorld];
@@ -348,12 +348,12 @@ namespace Volatile
     /// A world-space point query, used as a shortcut in collision tests.
     /// </summary>
     internal bool ContainsPoint(
-      Vector2 worldSpacePoint)
+      VoltVector2 worldSpacePoint)
     {
       for (int i = 0; i < this.countWorld; i++)
       {
         Axis axis = this.worldAxes[i];
-        if (Vector2.Dot(axis.Normal, worldSpacePoint) > axis.Width)
+        if (VoltVector2.Dot(axis.Normal, worldSpacePoint) > axis.Width)
           return false;
       }
       return true;
@@ -363,12 +363,12 @@ namespace Volatile
     /// Special case that ignores axes pointing away from the normal.
     /// </summary>
     internal bool ContainsPointPartial(
-      Vector2 worldSpacePoint,
-      Vector2 worldSpaceNormal)
+      VoltVector2 worldSpacePoint,
+      VoltVector2 worldSpaceNormal)
     {
       foreach (Axis axis in this.worldAxes)
-        if (Vector2.Dot(axis.Normal, worldSpaceNormal) >= Fix64.Zero &&
-            Vector2.Dot(axis.Normal, worldSpacePoint) > axis.Width)
+        if (VoltVector2.Dot(axis.Normal, worldSpaceNormal) >= Fix64.Zero &&
+            VoltVector2.Dot(axis.Normal, worldSpacePoint) > axis.Width)
           return false;
       return true;
     }
@@ -380,14 +380,14 @@ namespace Volatile
       if ((this.worldVertices == null) ||
           (this.worldVertices.Length < length))
       {
-        this.worldVertices = new Vector2[length];
+        this.worldVertices = new VoltVector2[length];
         this.worldAxes = new Axis[length];
       }
 
       if ((this.bodyVertices == null) ||
           (this.bodyVertices.Length < length))
       {
-        this.bodyVertices = new Vector2[length];
+        this.bodyVertices = new VoltVector2[length];
         this.bodyAxes = new Axis[length];
       }
     }
@@ -398,9 +398,9 @@ namespace Volatile
 
       for (int i = 0; i < this.countBody; i++)
       {
-        Vector2 v = this.bodyVertices[i];
-        Vector2 u = this.bodyVertices[(i + 1) % this.countBody];
-        Vector2 w = this.bodyVertices[(i + 2) % this.countBody];
+        VoltVector2 v = this.bodyVertices[i];
+        VoltVector2 u = this.bodyVertices[(i + 1) % this.countBody];
+        VoltVector2 w = this.bodyVertices[(i + 2) % this.countBody];
 
         sum += u.x * (v.y - w.y);
       }
@@ -415,11 +415,11 @@ namespace Volatile
 
       for (int i = 0; i < this.countBody; i++)
       {
-        Vector2 v = this.bodyVertices[i];
-        Vector2 u = this.bodyVertices[(i + 1) % this.countBody];
+        VoltVector2 v = this.bodyVertices[i];
+        VoltVector2 u = this.bodyVertices[(i + 1) % this.countBody];
 
         Fix64 a = VoltMath.Cross(u, v);
-        Fix64 b = v.sqrMagnitude + u.sqrMagnitude + Vector2.Dot(v, u);
+        Fix64 b = v.sqrMagnitude + u.sqrMagnitude + VoltVector2.Dot(v, u);
         s1 += a * b;
         s2 += a;
       }
@@ -437,7 +437,7 @@ namespace Volatile
 
       // Pre-compute and initialize values
       Fix64 shortestDist = Fix64.MaxValue;
-      Vector2 v3 = bodySpaceRay.direction.Left();
+      VoltVector2 v3 = bodySpaceRay.direction.Left();
 
       // Check the edges -- this will be different from the raycast because
       // we care about staying within the ends of the edge line segment
@@ -446,15 +446,15 @@ namespace Volatile
         Axis curAxis = this.bodyAxes[i];
 
         // Push the edges out by the radius
-        Vector2 extension = curAxis.Normal * radius;
-        Vector2 a = this.bodyVertices[i] + extension;
-        Vector2 b = this.bodyVertices[(i + 1) % this.countBody] + extension;
+        VoltVector2 extension = curAxis.Normal * radius;
+        VoltVector2 a = this.bodyVertices[i] + extension;
+        VoltVector2 b = this.bodyVertices[(i + 1) % this.countBody] + extension;
 
         // Update the check for containment
         if (couldBeContained == true)
         {
           Fix64 proj = 
-            Vector2.Dot(curAxis.Normal, bodySpaceRay.origin) - curAxis.Width;
+            VoltVector2.Dot(curAxis.Normal, bodySpaceRay.origin) - curAxis.Width;
 
           // The point lies outside of the outer layer
           if (proj > radius)
@@ -474,17 +474,17 @@ namespace Volatile
         }
 
         // For the cast, only consider rays pointing towards the edge
-        if (Vector2.Dot(curAxis.Normal, bodySpaceRay.direction) >= Fix64.Zero)
+        if (VoltVector2.Dot(curAxis.Normal, bodySpaceRay.direction) >= Fix64.Zero)
           continue;
 
         // See: 
         // https://rootllama.wordpress.com/2014/06/20/ray-line-segment-intersection-test-in-2d/
-        Vector2 v1 = bodySpaceRay.origin - a;
-        Vector2 v2 = b - a;
+        VoltVector2 v1 = bodySpaceRay.origin - a;
+        VoltVector2 v2 = b - a;
 
-        Fix64 denominator = Vector2.Dot(v2, v3);
+        Fix64 denominator = VoltVector2.Dot(v2, v3);
         Fix64 t1 = VoltMath.Cross(v2, v1) / denominator;
-        Fix64 t2 = Vector2.Dot(v1, v3) / denominator;
+        Fix64 t2 = VoltVector2.Dot(v1, v3) / denominator;
 
         if ((t2 >= Fix64.Zero) && (t2 <= Fix64.One) && (t1 > Fix64.Zero) && (t1 < shortestDist))
         {

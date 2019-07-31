@@ -43,13 +43,13 @@ namespace Volatile
     public static VoltAABB CreateMerged(VoltAABB aabb1, VoltAABB aabb2)
     {
       return new VoltAABB(
-        Mathf.Max(aabb1.top, aabb2.top),
-        Mathf.Min(aabb1.bottom, aabb2.bottom),
-        Mathf.Min(aabb1.left, aabb2.left),
-        Mathf.Max(aabb1.right, aabb2.right));
+        VoltMath.Max(aabb1.top, aabb2.top),
+        VoltMath.Min(aabb1.bottom, aabb2.bottom),
+        VoltMath.Min(aabb1.left, aabb2.left),
+        VoltMath.Max(aabb1.right, aabb2.right));
     }
 
-    public static VoltAABB CreateSwept(VoltAABB source, Vector2 vector)
+    public static VoltAABB CreateSwept(VoltAABB source, VoltVector2 vector)
     {
       Fix64 top = source.top;
       Fix64 bottom = source.bottom;
@@ -104,24 +104,24 @@ namespace Volatile
     }
     #endregion
 
-    public Vector2 TopLeft 
+    public VoltVector2 TopLeft 
     { 
-      get { return new Vector2(this.left, this.top); } 
+      get { return new VoltVector2(this.left, this.top); } 
     }
 
-    public Vector2 TopRight 
+    public VoltVector2 TopRight 
     { 
-      get { return new Vector2(this.right, this.top); } 
+      get { return new VoltVector2(this.right, this.top); } 
     }
 
-    public Vector2 BottomLeft 
+    public VoltVector2 BottomLeft 
     { 
-      get { return new Vector2(this.left, this.bottom); } 
+      get { return new VoltVector2(this.left, this.bottom); } 
     }
 
-    public Vector2 BottomRight 
+    public VoltVector2 BottomRight 
     { 
-      get { return new Vector2(this.right, this.bottom); } 
+      get { return new VoltVector2(this.right, this.bottom); } 
     }
 
     public Fix64 Top { get { return this.top; } }
@@ -138,10 +138,10 @@ namespace Volatile
       get { return (Fix64)2 * (this.Width + this.Height); } 
     }
 
-    public Vector2 Center { get { return this.ComputeCenter(); } }
-    public Vector2 Extent 
+    public VoltVector2 Center { get { return this.ComputeCenter(); } }
+    public VoltVector2 Extent 
     { 
-      get { return new Vector2(this.Width / (Fix64)2, this.Height / (Fix64)2); } 
+      get { return new VoltVector2(this.Width / (Fix64)2, this.Height / (Fix64)2); } 
     }
 
     private readonly Fix64 top;
@@ -153,7 +153,7 @@ namespace Volatile
     /// <summary>
     /// Performs a point test on the AABB.
     /// </summary>
-    public bool QueryPoint(Vector2 point)
+    public bool QueryPoint(VoltVector2 point)
     {
       return 
         this.left <= point.x && 
@@ -165,7 +165,7 @@ namespace Volatile
     /// <summary>
     /// Note: This doesn't take rounded edges into account.
     /// </summary>
-    public bool QueryCircleApprox(Vector2 origin, Fix64 radius)
+    public bool QueryCircleApprox(VoltVector2 origin, Fix64 radius)
     {
       return
         (this.left - radius) <= origin.x &&
@@ -225,10 +225,10 @@ namespace Volatile
       this.right = right;
     }
 
-    public VoltAABB(Vector2 center, Vector2 extents)
+    public VoltAABB(VoltVector2 center, VoltVector2 extents)
     {
-      Vector2 topRight = center + extents;
-      Vector2 bottomLeft = center - extents;
+      VoltVector2 topRight = center + extents;
+      VoltVector2 bottomLeft = center - extents;
 
       this.top = topRight.y;
       this.right = topRight.x;
@@ -236,34 +236,34 @@ namespace Volatile
       this.left = bottomLeft.x;
     }
 
-    public VoltAABB(Vector2 center, Fix64 radius)
-      : this (center, new Vector2(radius, radius))
+    public VoltAABB(VoltVector2 center, Fix64 radius)
+      : this (center, new VoltVector2(radius, radius))
     {
     }
 
-    public VoltAABB ComputeTopLeft(Vector2 center)
+    public VoltAABB ComputeTopLeft(VoltVector2 center)
     {
       return new VoltAABB(this.top, center.y, this.left, center.x);
     }
 
-    public VoltAABB ComputeTopRight(Vector2 center)
+    public VoltAABB ComputeTopRight(VoltVector2 center)
     {
       return new VoltAABB(this.top, center.y, center.x, this.right);
     }
 
-    public VoltAABB ComputeBottomLeft(Vector2 center)
+    public VoltAABB ComputeBottomLeft(VoltVector2 center)
     {
       return new VoltAABB(center.y, this.bottom, this.left, center.x);
     }
 
-    public VoltAABB ComputeBottomRight(Vector2 center)
+    public VoltAABB ComputeBottomRight(VoltVector2 center)
     {
       return new VoltAABB(center.y, this.bottom, center.x, this.right);
     }
 
-    private Vector2 ComputeCenter()
+    private VoltVector2 ComputeCenter()
     {
-      return new Vector2(
+      return new VoltVector2(
         (this.Width / (Fix64)2) + this.left, 
         (this.Height / (Fix64)2) + this.bottom);
     }

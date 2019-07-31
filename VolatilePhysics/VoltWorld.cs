@@ -140,7 +140,7 @@ namespace Volatile
         /// Creates a new polygon shape from world-space vertices.
         /// </summary>
         public VoltPolygon CreatePolygonWorldSpace(
-          Vector2[] worldVertices, Fix64 density, Fix64 friction, Fix64 restitution)
+          VoltVector2[] worldVertices, Fix64 density, Fix64 friction, Fix64 restitution)
         {
             VoltPolygon polygon = (VoltPolygon)this.polygonPool.Allocate();
             polygon.InitializeFromWorldVertices(
@@ -151,7 +151,7 @@ namespace Volatile
             return polygon;
         }
 
-        public VoltPolygon CreatePolygonWorldSpace(Vector2[] worldVertices)
+        public VoltPolygon CreatePolygonWorldSpace(VoltVector2[] worldVertices)
         {
             return CreatePolygonWorldSpace(worldVertices, VoltConfig.DEFAULT_DENSITY, VoltConfig.DEFAULT_FRICTION, VoltConfig.DEFAULT_RESTITUTION);
         }
@@ -160,7 +160,7 @@ namespace Volatile
         /// Creates a new polygon shape from body-space vertices.
         /// </summary>
         public VoltPolygon CreatePolygonBodySpace(
-          Vector2[] bodyVertices, Fix64 density, Fix64 friction, Fix64 restitution)
+          VoltVector2[] bodyVertices, Fix64 density, Fix64 friction, Fix64 restitution)
         {
             VoltPolygon polygon = (VoltPolygon)this.polygonPool.Allocate();
             polygon.InitializeFromBodyVertices(
@@ -171,7 +171,7 @@ namespace Volatile
             return polygon;
         }
 
-        public VoltPolygon CreatePolygonBodySpace(Vector2[] bodyVertices)
+        public VoltPolygon CreatePolygonBodySpace(VoltVector2[] bodyVertices)
         {
             return CreatePolygonBodySpace(bodyVertices, VoltConfig.DEFAULT_DENSITY, VoltConfig.DEFAULT_FRICTION, VoltConfig.DEFAULT_RESTITUTION);
         }
@@ -180,7 +180,7 @@ namespace Volatile
         /// Creates a new circle shape from a world-space origin.
         /// </summary>
         public VoltCircle CreateCircleWorldSpace(
-          Vector2 worldSpaceOrigin, Fix64 radius, Fix64 density, Fix64 friction, Fix64 restitution)
+          VoltVector2 worldSpaceOrigin, Fix64 radius, Fix64 density, Fix64 friction, Fix64 restitution)
         {
             VoltCircle circle = (VoltCircle)this.circlePool.Allocate();
             circle.InitializeFromWorldSpace(
@@ -192,12 +192,12 @@ namespace Volatile
             return circle;
         }
 
-        public VoltCircle CreateCircleWorldSpace(Vector2 worldSpaceOrigin, Fix64 radius, Fix64 density)
+        public VoltCircle CreateCircleWorldSpace(VoltVector2 worldSpaceOrigin, Fix64 radius, Fix64 density)
         {
             return CreateCircleWorldSpace(worldSpaceOrigin, radius, density, VoltConfig.DEFAULT_FRICTION, VoltConfig.DEFAULT_RESTITUTION);
         }
         
-        public VoltCircle CreateCircleWorldSpace(Vector2 worldSpaceOrigin, Fix64 radius)
+        public VoltCircle CreateCircleWorldSpace(VoltVector2 worldSpaceOrigin, Fix64 radius)
         {
             return CreateCircleWorldSpace(worldSpaceOrigin, radius, VoltConfig.DEFAULT_DENSITY, VoltConfig.DEFAULT_FRICTION, VoltConfig.DEFAULT_RESTITUTION);
         }
@@ -206,7 +206,7 @@ namespace Volatile
         /// Creates a new static body and adds it to the world.
         /// </summary>
         public VoltBody CreateStaticBody(
-          Vector2 position,
+          VoltVector2 position,
           Fix64 radians,
           params VoltShape[] shapesToAdd)
         {
@@ -220,7 +220,7 @@ namespace Volatile
         /// Creates a new dynamic body and adds it to the world.
         /// </summary>
         public VoltBody CreateDynamicBody(
-          Vector2 position,
+          VoltVector2 position,
           Fix64 radians,
           params VoltShape[] shapesToAdd)
         {
@@ -236,7 +236,7 @@ namespace Volatile
         /// </summary>
         public void AddBody(
           VoltBody body,
-          Vector2 position,
+          VoltVector2 position,
           Fix64 radians)
         {
 #if DEBUG
@@ -329,7 +329,7 @@ namespace Volatile
         /// invalidate the resulting enumeration from this function.
         /// </summary>
         public VoltBuffer<VoltBody> QueryPoint(
-          Vector2 point,
+          VoltVector2 point,
           VoltBodyFilter filter = null,
           int ticksBehind = 0)
         {
@@ -358,7 +358,7 @@ namespace Volatile
         /// invalidate the resulting enumeration from this function.
         /// </summary>
         public VoltBuffer<VoltBody> QueryCircle(
-          Vector2 origin,
+          VoltVector2 origin,
           Fix64 radius,
           VoltBodyFilter filter = null,
           int ticksBehind = 0)

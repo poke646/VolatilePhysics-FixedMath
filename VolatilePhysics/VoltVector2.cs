@@ -22,14 +22,14 @@ using FixMath.NET;
 
 namespace Volatile
 {
-    public struct Vector2
+    public struct VoltVector2
     {
         public readonly Fix64 x;
         public readonly Fix64 y;
 
-        public static Vector2 zero => new Vector2();
+        public static VoltVector2 zero => new VoltVector2();
 
-        public static Fix64 Dot(Vector2 a, Vector2 b)
+        public static Fix64 Dot(VoltVector2 a, VoltVector2 b)
         {
             return (a.x * b.x) + (a.y * b.y);
         }
@@ -46,48 +46,48 @@ namespace Volatile
         {
             get
             {
-                return Mathf.Sqrt(this.sqrMagnitude);
+                return VoltMath.Sqrt(this.sqrMagnitude);
             }
         }
 
-        public Vector2 normalized
+        public VoltVector2 normalized
         {
             get
             {
                 Fix64 magnitude = this.magnitude;
-                return new Vector2(this.x / magnitude, this.y / magnitude);
+                return new VoltVector2(this.x / magnitude, this.y / magnitude);
             }
         }
 
-        public Vector2(Fix64 x, Fix64 y)
+        public VoltVector2(Fix64 x, Fix64 y)
         {
             this.x = x;
             this.y = y;
         }
 
-        public static Vector2 operator *(Vector2 a, Fix64 b)
+        public static VoltVector2 operator *(VoltVector2 a, Fix64 b)
         {
-            return new Vector2(a.x * b, a.y * b);
+            return new VoltVector2(a.x * b, a.y * b);
         }
 
-        public static Vector2 operator *(Fix64 a, Vector2 b)
+        public static VoltVector2 operator *(Fix64 a, VoltVector2 b)
         {
-            return new Vector2(b.x * a, b.y * a);
+            return new VoltVector2(b.x * a, b.y * a);
         }
 
-        public static Vector2 operator +(Vector2 a, Vector2 b)
+        public static VoltVector2 operator +(VoltVector2 a, VoltVector2 b)
         {
-            return new Vector2(a.x + b.x, a.y + b.y);
+            return new VoltVector2(a.x + b.x, a.y + b.y);
         }
 
-        public static Vector2 operator -(Vector2 a, Vector2 b)
+        public static VoltVector2 operator -(VoltVector2 a, VoltVector2 b)
         {
-            return new Vector2(a.x - b.x, a.y - b.y);
+            return new VoltVector2(a.x - b.x, a.y - b.y);
         }
 
-        public static Vector2 operator -(Vector2 a)
+        public static VoltVector2 operator -(VoltVector2 a)
         {
-            return new Vector2(-a.x, -a.y);
+            return new VoltVector2(-a.x, -a.y);
         }
     }
 }

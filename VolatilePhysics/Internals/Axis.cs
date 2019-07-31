@@ -53,13 +53,13 @@ namespace Volatile
   /// </summary>
   internal struct Axis
   {
-    internal Vector2 Normal { get { return this.normal; } }
+    internal VoltVector2 Normal { get { return this.normal; } }
     internal Fix64 Width { get { return this.width; } }
 
-    private readonly Vector2 normal;
+    private readonly VoltVector2 normal;
     private readonly Fix64 width;
 
-    internal Axis(Vector2 normal, Fix64 width)
+    internal Axis(VoltVector2 normal, Fix64 width)
     {
       this.normal = normal;
       this.width = width;

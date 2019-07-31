@@ -114,7 +114,7 @@ namespace Volatile
       if (index < 0)
         return null;
 
-      Vector2 a, b;
+      VoltVector2 a, b;
       poly.GetEdge(index, out a, out b);
       Axis axis = poly.GetWorldAxis(index);
 
@@ -128,7 +128,7 @@ namespace Volatile
 
       // Build the collision Manifold
       Manifold manifold = world.AllocateManifold().Assign(world, circ, poly);
-      Vector2 pos =
+      VoltVector2 pos =
         circ.worldSpaceOrigin - (circ.radius + penetration / (Fix64)2) * axis.Normal;
       manifold.AddContact(pos, -axis.Normal, penetration);
       return manifold;
@@ -165,11 +165,11 @@ namespace Volatile
     /// Simple check for point-circle containment.
     /// </summary>
     internal static bool TestPointCircleSimple(
-      Vector2 point,
-      Vector2 origin,
+      VoltVector2 point,
+      VoltVector2 origin,
       Fix64 radius)
     {
-      Vector2 delta = origin - point;
+      VoltVector2 delta = origin - point;
       return delta.sqrMagnitude <= (radius * radius);
     }
 
@@ -177,8 +177,8 @@ namespace Volatile
     /// Simple check for two overlapping circles.
     /// </summary>
     internal static bool TestCircleCircleSimple(
-      Vector2 originA,
-      Vector2 originB,
+      VoltVector2 originA,
+      VoltVector2 originB,
       Fix64 radiusA,
       Fix64 radiusB)
     {
@@ -191,12 +191,12 @@ namespace Volatile
     /// </summary>
     internal static bool CircleRayCast(
       VoltShape shape,
-      Vector2 shapeOrigin,
+      VoltVector2 shapeOrigin,
       Fix64 sqrRadius,
       ref VoltRayCast ray,
       ref VoltRayResult result)
     {
-      Vector2 toOrigin = shapeOrigin - ray.origin;
+      VoltVector2 toOrigin = shapeOrigin - ray.origin;
 
       if (toOrigin.sqrMagnitude < sqrRadius)
       {
@@ -204,22 +204,22 @@ namespace Volatile
         return true;
       }
 
-      Fix64 slope = Vector2.Dot(toOrigin, ray.direction);
+      Fix64 slope = VoltVector2.Dot(toOrigin, ray.direction);
       if (slope < Fix64.Zero)
         return false;
 
       Fix64 sqrSlope = slope * slope;
-      Fix64 d = sqrRadius + sqrSlope - Vector2.Dot(toOrigin, toOrigin);
+      Fix64 d = sqrRadius + sqrSlope - VoltVector2.Dot(toOrigin, toOrigin);
       if (d < Fix64.Zero)
         return false;
 
-      Fix64 dist = slope - Mathf.Sqrt(d);
+      Fix64 dist = slope - VoltMath.Sqrt(d);
       if (dist < Fix64.Zero || dist > ray.distance)
         return false;
 
       // N.B.: For historical raycasts this normal will be wrong!
       // Must be either transformed back to world or invalidated later.
-      Vector2 normal = (dist * ray.direction - toOrigin).normalized;
+      VoltVector2 normal = (dist * ray.direction - toOrigin).normalized;
       result.Set(shape, dist, normal);
       return true;
     }
@@ -230,7 +230,7 @@ namespace Volatile
     /// Outputs the minimum distance between the axis and the point.
     /// </summary>
     internal static int FindAxisShortestDistance(
-      Vector2 point,
+      VoltVector2 point,
       Axis[] axes,
       out Fix64 minDistance)
     {
@@ -240,7 +240,7 @@ namespace Volatile
 
       for (int i = 0; i < axes.Length; i++)
       {
-        Fix64 dot = Vector2.Dot(axes[i].Normal, point);
+        Fix64 dot = VoltVector2.Dot(axes[i].Normal, point);
         Fix64 dist = axes[i].Width - dot;
 
         if (dist < Fix64.Zero)
@@ -268,7 +268,7 @@ namespace Volatile
     /// Outputs the penetration depth of the circle in the axis (if any).
     /// </summary>
     internal static int FindAxisMaxPenetration(
-      Vector2 origin,
+      VoltVector2 origin,
       Fix64 radius,
       VoltPolygon poly,
       out Fix64 penetration)
@@ -280,7 +280,7 @@ namespace Volatile
       for (int i = 0; i < poly.countWorld; i++)
       {
         Axis axis = poly.worldAxes[i];
-        Fix64 dot = Vector2.Dot(axis.Normal, origin);
+        Fix64 dot = VoltVector2.Dot(axis.Normal, origin);
         Fix64 dist = dot - axis.Width - radius;
 
         if (dist > Fix64.Zero)
@@ -309,22 +309,22 @@ namespace Volatile
       VoltWorld world,
       VoltCircle shapeA,
       VoltShape shapeB,
-      Vector2 overrideBCenter, // For testing vertices in circles
+      VoltVector2 overrideBCenter, // For testing vertices in circles
       Fix64 overrideBRadius)
     {
-      Vector2 r = overrideBCenter - shapeA.worldSpaceOrigin;
+      VoltVector2 r = overrideBCenter - shapeA.worldSpaceOrigin;
       Fix64 min = shapeA.radius + overrideBRadius;
       Fix64 distSq = r.sqrMagnitude;
 
       if (distSq >= min * min)
         return null;
 
-      Fix64 dist = Mathf.Sqrt(distSq);
+      Fix64 dist = VoltMath.Sqrt(distSq);
 
       // 최소값을 지정하여 divide by zero 방지
-      Fix64 distInv = Fix64.One / Mathf.Max(dist, min / (Fix64)10);
+      Fix64 distInv = Fix64.One / VoltMath.Max(dist, min / (Fix64)10);
 
-      Vector2 pos =
+      VoltVector2 pos =
         shapeA.worldSpaceOrigin +
         (Fix64.One / (Fix64)2 + distInv * (shapeA.radius - min / (Fix64)2)) * r;
 
@@ -340,7 +340,7 @@ namespace Volatile
       VoltPolygon poly2,
       out Axis axis)
     {
-      axis = new Axis(Vector2.zero, Fix64.MinValue);
+      axis = new Axis(VoltVector2.zero, Fix64.MinValue);
 
       for (int i = 0; i < poly1.countWorld; i++)
       {
@@ -348,8 +348,8 @@ namespace Volatile
         Fix64 min = Fix64.MaxValue;
         for (int j = 0; j < poly2.countWorld; j++)
         {
-          Vector2 v = poly2.worldVertices[j];
-          min = Mathf.Min(min, Vector2.Dot(a.Normal, v));
+          VoltVector2 v = poly2.worldVertices[j];
+          min = VoltMath.Min(min, VoltVector2.Dot(a.Normal, v));
         }
         min -= a.Width;
 
@@ -372,7 +372,7 @@ namespace Volatile
     private static void FindVerts(
       VoltPolygon poly1,
       VoltPolygon poly2,
-      Vector2 normal,
+      VoltVector2 normal,
       Fix64 penetration,
       Manifold manifold)
     {
@@ -380,7 +380,7 @@ namespace Volatile
 
       for (int i = 0; i < poly1.countWorld; i++)
       {
-        Vector2 vertex = poly1.worldVertices[i];
+        VoltVector2 vertex = poly1.worldVertices[i];
         if (poly2.ContainsPoint(vertex) == true)
         {
           if (manifold.AddContact(vertex, normal, penetration) == false)
@@ -391,7 +391,7 @@ namespace Volatile
 
       for (int i = 0; i < poly2.countWorld; i++)
       {
-        Vector2 vertex = poly2.worldVertices[i];
+        VoltVector2 vertex = poly2.worldVertices[i];
         if (poly1.ContainsPoint(vertex) == true)
         {
           if (manifold.AddContact(vertex, normal, penetration) == false)
@@ -411,13 +411,13 @@ namespace Volatile
     private static void FindVertsFallback(
       VoltPolygon poly1,
       VoltPolygon poly2,
-      Vector2 normal,
+      VoltVector2 normal,
       Fix64 penetration,
       Manifold manifold)
     {
       for (int i = 0; i < poly1.countWorld; i++)
       {
-        Vector2 vertex = poly1.worldVertices[i];
+        VoltVector2 vertex = poly1.worldVertices[i];
         if (poly2.ContainsPointPartial(vertex, normal) == true)
           if (manifold.AddContact(vertex, normal, penetration) == false)
             return;
@@ -425,7 +425,7 @@ namespace Volatile
 
       for (int i = 0; i < poly2.countWorld; i++)
       {
-        Vector2 vertex = poly2.worldVertices[i];
+        VoltVector2 vertex = poly2.worldVertices[i];
         if (poly1.ContainsPointPartial(vertex, -normal) == true)
           if (manifold.AddContact(vertex, normal, penetration) == false)
             return;

@@ -44,13 +44,13 @@ namespace Volatile
     }
 
     public Fix64 Distance { get { return this.distance; } }
-    public Vector2 Normal { get { return this.normal; } }
+    public VoltVector2 Normal { get { return this.normal; } }
 
     private VoltShape shape;
     private Fix64 distance;
-    internal Vector2 normal;
+    internal VoltVector2 normal;
 
-    public Vector2 ComputePoint(ref VoltRayCast cast)
+    public VoltVector2 ComputePoint(ref VoltRayCast cast)
     {
       return cast.origin + (cast.direction * this.distance);
     }
@@ -58,7 +58,7 @@ namespace Volatile
     internal void Set(
       VoltShape shape,
       Fix64 distance,
-      Vector2 normal)
+      VoltVector2 normal)
     {
       if (this.IsValid == false || distance < this.distance)
       {
@@ -77,7 +77,7 @@ namespace Volatile
     {
       this.shape = shape;
       this.distance = Fix64.Zero;
-      this.normal = Vector2.zero;
+      this.normal = VoltVector2.zero;
     }
   }
 }

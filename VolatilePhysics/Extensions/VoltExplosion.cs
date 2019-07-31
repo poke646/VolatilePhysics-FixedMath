@@ -44,7 +44,7 @@ namespace Volatile
     private VoltBuffer<VoltBody> occludingBodies;
 
     public void PerformExplosion(
-      Vector2 origin,
+      VoltVector2 origin,
       Fix64 radius,
       VoltExplosionCallback callback,
       VoltBodyFilter targetFilter = null,
@@ -77,7 +77,7 @@ namespace Volatile
 
       for (int i = 0; i < rayCount; i++)
       {
-        Vector2 normal = VoltMath.Polar(angleIncrement * (Fix64)i);
+        VoltVector2 normal = VoltMath.Polar(angleIncrement * (Fix64)i);
         ray = new VoltRayCast(origin, normal, radius);
 
         Fix64 minDistance = 
@@ -135,7 +135,7 @@ namespace Volatile
     /// and pass the target filter test. Does not test actual shapes.
     /// </summary>
     private void PopulateFiltered(
-      Vector2 origin,
+      VoltVector2 origin,
       Fix64 radius,
       VoltBodyFilter targetFilter,
       int ticksBehind,

@@ -66,8 +66,8 @@ namespace Volatile
     /// </summary>
     public bool TryGetSpace(
       int ticksBehind,
-      out Vector2 position,
-      out Vector2 facing)
+      out VoltVector2 position,
+      out VoltVector2 facing)
     {
       if (ticksBehind < 0)
         throw new ArgumentOutOfRangeException("ticksBehind");
@@ -152,13 +152,13 @@ namespace Volatile
 
     // Some basic properties are stored in an internal mutable
     // record to avoid code redundancy when performing conversions
-    public Vector2 Position
+    public VoltVector2 Position
     {
       get { return this.currentState.position; }
       private set { this.currentState.position = value; }
     }
 
-    public Vector2 Facing
+    public VoltVector2 Facing
     {
       get { return this.currentState.facing; }
       private set { this.currentState.facing = value; }
@@ -188,10 +188,10 @@ namespace Volatile
     /// </summary>
     public Fix64 Angle { get; private set; }
 
-    public Vector2 LinearVelocity { get; set; }
+    public VoltVector2 LinearVelocity { get; set; }
     public Fix64 AngularVelocity { get; set; }
 
-    public Vector2 Force { get; private set; }
+    public VoltVector2 Force { get; private set; }
     public Fix64 Torque { get; private set; }
 
     public Fix64 Mass { get; private set; }
@@ -199,7 +199,7 @@ namespace Volatile
     public Fix64 InvMass { get; private set; }
     public Fix64 InvInertia { get; private set; }
 
-    public Vector2 BiasVelocity { get; private set; }
+    public VoltVector2 BiasVelocity { get; private set; }
     public Fix64 BiasRotation { get; private set; }
 
     // Used for broadphase structures
@@ -217,18 +217,18 @@ namespace Volatile
       this.Torque += torque;
     }
 
-    public void AddForce(Vector2 force)
+    public void AddForce(VoltVector2 force)
     {
       this.Force += force;
     }
 
-    public void AddForce(Vector2 force, Vector2 point)
+    public void AddForce(VoltVector2 force, VoltVector2 point)
     {
       this.Force += force;
       this.Torque += VoltMath.Cross(this.Position - point, force);
     }
 
-    public void Set(Vector2 position, Fix64 radians)
+    public void Set(VoltVector2 position, Fix64 radians)
     {
       this.Position = position;
       this.Angle = radians;
@@ -236,7 +236,7 @@ namespace Volatile
       this.OnPositionUpdated();
     }
     
-    public void SetForce(Vector2 force, Fix64 torque, Vector2 biasVelocity, Fix64 biasRotation)
+    public void SetForce(VoltVector2 force, Fix64 torque, VoltVector2 biasVelocity, Fix64 biasRotation)
     {
       this.Force = force;
       this.Torque = torque;
@@ -265,7 +265,7 @@ namespace Volatile
     /// Begins with AABB checks unless bypassed.
     /// </summary>
     internal bool QueryPoint(
-      Vector2 point,
+      VoltVector2 point,
       int ticksBehind,
       bool bypassAABB = false)
     {
@@ -277,7 +277,7 @@ namespace Volatile
           return false;
 
       // Actual query on shapes done in body space
-      Vector2 bodySpacePoint = record.WorldToBodyPoint(point);
+      VoltVector2 bodySpacePoint = record.WorldToBodyPoint(point);
       for (int i = 0; i < this.shapeCount; i++)
         if (this.shapes[i].QueryPoint(bodySpacePoint))
           return true;
@@ -289,7 +289,7 @@ namespace Volatile
     /// Begins with AABB checks.
     /// </summary>
     internal bool QueryCircle(
-      Vector2 origin,
+      VoltVector2 origin,
       Fix64 radius,
       int ticksBehind,
       bool bypassAABB = false)
@@ -302,7 +302,7 @@ namespace Volatile
           return false;
 
       // Actual query on shapes done in body space
-      Vector2 bodySpaceOrigin = record.WorldToBodyPoint(origin);
+      VoltVector2 bodySpaceOrigin = record.WorldToBodyPoint(origin);
       for (int i = 0; i < this.shapeCount; i++)
         if (this.shapes[i].QueryCircle(bodySpaceOrigin, radius))
           return true;
@@ -380,7 +380,7 @@ namespace Volatile
     }
 
     internal void InitializeDynamic(
-      Vector2 position,
+      VoltVector2 position,
       Fix64 radians,
       VoltShape[] shapesToAdd)
     {
@@ -390,7 +390,7 @@ namespace Volatile
     }
 
     internal void InitializeStatic(
-      Vector2 position,
+      VoltVector2 position,
       Fix64 radians,
       VoltShape[] shapesToAdd)
     {
@@ -400,7 +400,7 @@ namespace Volatile
     }
 
     private void Initialize(
-      Vector2 position,
+      VoltVector2 position,
       Fix64 radians,
       VoltShape[] shapesToAdd)
     {
@@ -467,13 +467,13 @@ namespace Volatile
       this.history = null;
       this.currentState = default(HistoryRecord);
 
-      this.LinearVelocity = Vector2.zero;
+      this.LinearVelocity = VoltVector2.zero;
       this.AngularVelocity = Fix64.Zero;
 
-      this.Force = Vector2.zero;
+      this.Force = VoltVector2.zero;
       this.Torque = Fix64.Zero;
 
-      this.BiasVelocity = Vector2.zero;
+      this.BiasVelocity = VoltVector2.zero;
       this.BiasRotation = Fix64.Zero;
     }
 
@@ -494,10 +494,10 @@ namespace Volatile
       this.CollisionFilter = null;
 
       this.Angle = Fix64.Zero;
-      this.LinearVelocity = Vector2.zero;
+      this.LinearVelocity = VoltVector2.zero;
       this.AngularVelocity = Fix64.Zero;
 
-      this.Force = Vector2.zero;
+      this.Force = VoltVector2.zero;
       this.Torque = Fix64.Zero;
 
       this.Mass = Fix64.Zero;
@@ -505,7 +505,7 @@ namespace Volatile
       this.InvMass = Fix64.Zero;
       this.InvInertia = Fix64.Zero;
 
-      this.BiasVelocity = Vector2.zero;
+      this.BiasVelocity = VoltVector2.zero;
       this.BiasRotation = Fix64.Zero;
 
       this.history = null;
@@ -524,13 +524,13 @@ namespace Volatile
       return true;
     }
 
-    internal void ApplyImpulse(Vector2 j, Vector2 r)
+    internal void ApplyImpulse(VoltVector2 j, VoltVector2 r)
     {
       this.LinearVelocity += j * this.InvMass;
       this.AngularVelocity -= this.InvInertia * VoltMath.Cross(j, r);
     }
 
-    internal void ApplyBias(Vector2 j, Vector2 r)
+    internal void ApplyBias(VoltVector2 j, VoltVector2 r)
     {
       this.BiasVelocity += j * this.InvMass;
       this.BiasRotation -= this.InvInertia * VoltMath.Cross(j, r);
@@ -538,12 +538,12 @@ namespace Volatile
     #endregion
 
     #region Transformation Shortcuts
-    internal Vector2 WorldToBodyPointCurrent(Vector2 vector)
+    internal VoltVector2 WorldToBodyPointCurrent(VoltVector2 vector)
     {
       return this.currentState.WorldToBodyPoint(vector);
     }
 
-    internal Vector2 BodyToWorldPointCurrent(Vector2 vector)
+    internal VoltVector2 BodyToWorldPointCurrent(VoltVector2 vector)
     {
       return this.currentState.BodyToWorldPoint(vector);
     }
@@ -579,10 +579,10 @@ namespace Volatile
       {
         VoltAABB aabb = this.shapes[i].AABB;
 
-        top = Mathf.Max(top, aabb.Top);
-        right = Mathf.Max(right, aabb.Right);
-        bottom = Mathf.Min(bottom, aabb.Bottom);
-        left = Mathf.Min(left, aabb.Left);
+        top = VoltMath.Max(top, aabb.Top);
+        right = VoltMath.Max(right, aabb.Right);
+        bottom = VoltMath.Min(bottom, aabb.Bottom);
+        left = VoltMath.Min(left, aabb.Left);
       }
 
       this.AABB = new VoltAABB(top, bottom, left, right);
@@ -598,7 +598,7 @@ namespace Volatile
       this.AngularVelocity *= this.World.Damping;
 
       // Calculate total force and torque
-      Vector2 totalForce = this.Force * this.InvMass;
+      VoltVector2 totalForce = this.Force * this.InvMass;
       Fix64 totalTorque = this.Torque * this.InvInertia;
 
       // See http://www.niksula.hut.fi/~hkankaan/Homepages/gravity.html
@@ -610,7 +610,7 @@ namespace Volatile
     }
 
     private void IntegrateForces(
-      Vector2 force,
+      VoltVector2 force,
       Fix64 torque,
       Fix64 mult)
     {
@@ -629,9 +629,9 @@ namespace Volatile
 
     private void ClearForces()
     {
-      this.Force = Vector2.zero;
+      this.Force = VoltVector2.zero;
       this.Torque = Fix64.Zero;
-      this.BiasVelocity = Vector2.zero;
+      this.BiasVelocity = VoltVector2.zero;
       this.BiasRotation = Fix64.Zero;
     }
 

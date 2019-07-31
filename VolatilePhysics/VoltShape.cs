@@ -110,7 +110,7 @@ namespace Volatile
     /// Checks if a point is contained in this shape. 
     /// Begins with an AABB check.
     /// </summary>
-    internal bool QueryPoint(Vector2 bodySpacePoint)
+    internal bool QueryPoint(VoltVector2 bodySpacePoint)
     {
       // Queries and casts on shapes are always done in body space
       if (this.bodySpaceAABB.QueryPoint(bodySpacePoint))
@@ -122,7 +122,7 @@ namespace Volatile
     /// Checks if a circle overlaps with this shape. 
     /// Begins with an AABB check.
     /// </summary>
-    internal bool QueryCircle(Vector2 bodySpaceOrigin, Fix64 radius)
+    internal bool QueryCircle(VoltVector2 bodySpaceOrigin, Fix64 radius)
     {
       // Queries and casts on shapes are always done in body space
       if (this.bodySpaceAABB.QueryCircleApprox(bodySpaceOrigin, radius))
@@ -202,10 +202,10 @@ namespace Volatile
 
     #region Test Overrides
     protected abstract bool ShapeQueryPoint(
-      Vector2 bodySpacePoint);
+      VoltVector2 bodySpacePoint);
 
     protected abstract bool ShapeQueryCircle(
-      Vector2 bodySpaceOrigin,
+      VoltVector2 bodySpaceOrigin,
       Fix64 radius);
 
     protected abstract bool ShapeRayCast(

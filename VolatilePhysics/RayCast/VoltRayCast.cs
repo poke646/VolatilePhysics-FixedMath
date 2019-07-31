@@ -33,16 +33,16 @@ namespace Volatile
   /// </summary>
   public struct VoltRayCast
   {
-    internal readonly Vector2 origin;
-    internal readonly Vector2 direction;
-    internal readonly Vector2 invDirection;
+    internal readonly VoltVector2 origin;
+    internal readonly VoltVector2 direction;
+    internal readonly VoltVector2 invDirection;
     internal readonly Fix64 distance;
     internal readonly bool signX;
     internal readonly bool signY;
 
-    public VoltRayCast(Vector2 origin, Vector2 destination)
+    public VoltRayCast(VoltVector2 origin, VoltVector2 destination)
     {
-      Vector2 delta = destination - origin;
+      VoltVector2 delta = destination - origin;
 
       this.origin = origin;
       this.direction = delta.normalized;
@@ -50,10 +50,10 @@ namespace Volatile
       this.signX = direction.x < Fix64.Zero;
       this.signY = direction.y < Fix64.Zero;
       this.invDirection = 
-        new Vector2(Fix64.One / direction.x, Fix64.One / direction.y);
+        new VoltVector2(Fix64.One / direction.x, Fix64.One / direction.y);
     }
 
-    public VoltRayCast(Vector2 origin, Vector2 direction, Fix64 distance)
+    public VoltRayCast(VoltVector2 origin, VoltVector2 direction, Fix64 distance)
     {
       this.origin = origin;
       this.direction = direction;
@@ -61,7 +61,7 @@ namespace Volatile
       this.signX = direction.x < Fix64.Zero;
       this.signY = direction.y < Fix64.Zero;
       this.invDirection = 
-        new Vector2(Fix64.One / direction.x, Fix64.One / direction.y);
+        new VoltVector2(Fix64.One / direction.x, Fix64.One / direction.y);
     }
   }
 }
