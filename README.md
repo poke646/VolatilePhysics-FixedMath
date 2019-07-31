@@ -1,4 +1,6 @@
-This is the deterministic fork of ashoulson/VolatilePhysics, built for .NET Standard
+**VolatilePhysics-FixedMath**
+
+This is the deterministic fork of [VolatilePhysics](https://github.com/ashoulson/VolatilePhysics), built for .NET Standard
 
 Used [FixedMath.Net](https://github.com/asik/FixedMath.Net) for deterministic mathmatics
 
@@ -29,6 +31,7 @@ Supported Physics Tasks:
 - Historical ray/circle tests on past world state
 - Discrete collision detection and resolution bodies
 - Force/torque application and integration on dynamic bodies
+- **Determinism**
 
 Wishlist:
 - Continuous collision detection
@@ -36,7 +39,7 @@ Wishlist:
 
 Not Supported:
 - Joints and constraints
-- Determinism (Volatile uses floating-point values, and is not deterministic across hardware configurations)
+- ~~Determinism (Volatile uses floating-point values, and is not deterministic across hardware configurations)~~
 
 Primary Design Features of Volatile:
 - **Safe Repositioning.** Bodies and individual shapes can be moved to arbitrary positions by an external process without compromising the integrity of the physics simulation. This occurs frequently when clients correct for prediction errors and must move a player controller to match the authoritative server's position. Volatile is largely stateless -- very little trajectory data is preserved between frames aside from the position, orientation, and angular/linear velocity of each body.
