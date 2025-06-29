@@ -4,6 +4,33 @@
 
 Continuous Collision Detection (CCD) to zaawansowana funkcja fizyki, która pomaga wykrywać kolizje między szybko poruszającymi się obiektami. Bez CCD, obiekty poruszające się z dużą prędkością mogą "przeskoczyć" przez cienkie przeszkody między klatkami, powodując efekt "tunelingu".
 
+**Status implementacji**: ✅ **UKOŃCZONA** - CCD zostało pomyślnie dodane do VolatilePhysics!
+
+## Zaimplementowane funkcje
+
+### Nowe właściwości VoltBody
+- `EnableCCD` - włącza/wyłącza CCD dla ciała
+- `CCDVelocityThreshold` - próg prędkości aktywacji CCD
+- `PreviousPosition` - poprzednia pozycja (do obliczeń CCD)
+- `PreviousAngle` - poprzedni kąt (do obliczeń CCD)
+
+### Nowe metody VoltBody
+- `RequiresCCD()` - sprawdza czy ciało wymaga CCD
+- `SweepTest()` - wykonuje test swept collision
+- `GetSweptAABB()` - tworzy rozszerzony AABB dla trajektorii ruchu
+- `CalculateTimeOfImpact()` - oblicza moment kolizji
+
+### Nowe API VoltWorld
+- `EnableCCD(body, threshold?)` - włącza CCD dla ciała
+- `DisableCCD(body)` - wyłącza CCD dla ciała
+
+### Nowe konfiguracje VoltConfig
+- `CCD_LINEAR_SLOP` - tolerancja liniowa
+- `CCD_ANGULAR_SLOP` - tolerancja kątowa  
+- `CCD_VELOCITY_THRESHOLD` - domyślny próg prędkości
+- `CCD_MAX_ITERATIONS` - maksymalna liczba iteracji
+- `CCD_TIME_TOLERANCE` - tolerancja czasu
+
 ## Kiedy używać CCD
 
 CCD jest szczególnie przydatne w następujących scenariuszach:

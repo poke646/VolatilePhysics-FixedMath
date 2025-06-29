@@ -481,7 +481,7 @@ namespace Volatile
 
     internal void FreeShapes()
     {
-      if this.World != null)
+      if (this.World != null)
       {
         for (int i = 0; i < this.shapeCount; i++)
           this.World.FreeShape(this.shapes[i]);
@@ -792,7 +792,7 @@ namespace Volatile
       VoltAABB targetAABB = this.GetSweptAABB();
       VoltAABB otherAABB = other.AABB;
 
-      if (!targetAABB.Intersects(otherAABB))
+      if (!targetAABB.Intersect(otherAABB))
         return Fix64.One;
 
       // Calculate relative velocity
@@ -826,22 +826,8 @@ namespace Volatile
     /// </summary>
     internal VoltAABB GetSweptAABB()
     {
-      VoltAABB currentAABB = this.AABB;
       VoltVector2 deltaPosition = this.Position - this.PreviousPosition;
-      
-      VoltAABB sweptAABB = currentAABB;
-      
-      if (deltaPosition.x < Fix64.Zero)
-        sweptAABB.Min.x += deltaPosition.x;
-      else
-        sweptAABB.Max.x += deltaPosition.x;
-        
-      if (deltaPosition.y < Fix64.Zero)
-        sweptAABB.Min.y += deltaPosition.y;
-      else
-        sweptAABB.Max.y += deltaPosition.y;
-      
-      return sweptAABB;
+      return VoltAABB.CreateSwept(this.AABB, deltaPosition);
     }
 
     /// <summary>
@@ -857,17 +843,17 @@ namespace Volatile
       
       if (deltaPosition.x > Fix64.Zero)
       {
-        tMinX = (otherAABB.Min.x - thisAABB.Max.x) / deltaPosition.x;
-        tMaxX = (otherAABB.Max.x - thisAABB.Min.x) / deltaPosition.x;
+        tMinX = (otherAABB.Left - thisAABB.Right) / deltaPosition.x;
+        tMaxX = (otherAABB.Right - thisAABB.Left) / deltaPosition.x;
       }
       else if (deltaPosition.x < Fix64.Zero)
       {
-        tMinX = (otherAABB.Max.x - thisAABB.Min.x) / deltaPosition.x;
-        tMaxX = (otherAABB.Min.x - thisAABB.Max.x) / deltaPosition.x;
+        tMinX = (otherAABB.Right - thisAABB.Left) / deltaPosition.x;
+        tMaxX = (otherAABB.Left - thisAABB.Right) / deltaPosition.x;
       }
       else
       {
-        if (thisAABB.Min.x > otherAABB.Max.x || thisAABB.Max.x < otherAABB.Min.x)
+        if (thisAABB.Left > otherAABB.Right || thisAABB.Right < otherAABB.Left)
           return Fix64.One;
         tMinX = Fix64.Zero;
         tMaxX = Fix64.One;
@@ -875,29 +861,29 @@ namespace Volatile
       
       if (deltaPosition.y > Fix64.Zero)
       {
-        tMinY = (otherAABB.Min.y - thisAABB.Max.y) / deltaPosition.y;
-        tMaxY = (otherAABB.Max.y - thisAABB.Min.y) / deltaPosition.y;
+        tMinY = (otherAABB.Bottom - thisAABB.Top) / deltaPosition.y;
+        tMaxY = (otherAABB.Top - thisAABB.Bottom) / deltaPosition.y;
       }
       else if (deltaPosition.y < Fix64.Zero)
       {
-        tMinY = (otherAABB.Max.y - thisAABB.Min.y) / deltaPosition.y;
-        tMaxY = (otherAABB.Min.y - thisAABB.Max.y) / deltaPosition.y;
+        tMinY = (otherAABB.Top - thisAABB.Bottom) / deltaPosition.y;
+        tMaxY = (otherAABB.Bottom - thisAABB.Top) / deltaPosition.y;
       }
       else
       {
-        if (thisAABB.Min.y > otherAABB.Max.y || thisAABB.Max.y < otherAABB.Min.y)
+        if (thisAABB.Bottom > otherAABB.Top || thisAABB.Top < otherAABB.Bottom)
           return Fix64.One;
         tMinY = Fix64.Zero;
         tMaxY = Fix64.One;
       }
       
-      Fix64 tMin = Fix64.Max(tMinX, tMinY);
-      Fix64 tMax = Fix64.Min(tMaxX, tMaxY);
+      Fix64 tMin = VoltMath.Max(tMinX, tMinY);
+      Fix64 tMax = VoltMath.Min(tMaxX, tMaxY);
       
       if (tMin > tMax || tMax < Fix64.Zero || tMin > Fix64.One)
         return Fix64.One;
         
-      return Fix64.Max(Fix64.Zero, tMin);
+      return VoltMath.Max(Fix64.Zero, tMin);
     }
     #endregion
   }
