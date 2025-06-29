@@ -202,6 +202,29 @@ namespace Volatile
     public VoltVector2 BiasVelocity { get; private set; }
     public Fix64 BiasRotation { get; private set; }
 
+    /// <summary>
+    /// Enable Continuous Collision Detection for this body.
+    /// When enabled, the body will use swept collision detection
+    /// to prevent tunneling through thin objects.
+    /// </summary>
+    public bool EnableCCD { get; set; }
+
+    /// <summary>
+    /// Minimum velocity magnitude required to enable CCD for this body.
+    /// Only used when EnableCCD is true.
+    /// </summary>
+    public Fix64 CCDVelocityThreshold { get; set; }
+
+    /// <summary>
+    /// Previous position used for CCD calculations.
+    /// </summary>
+    internal VoltVector2 PreviousPosition { get; set; }
+
+    /// <summary>
+    /// Previous angle used for CCD calculations.
+    /// </summary>
+    internal Fix64 PreviousAngle { get; set; }
+
     // Used for broadphase structures
     internal int ProxyId { get; set; }
 
@@ -408,6 +431,12 @@ namespace Volatile
       this.Angle = radians;
       this.Facing = VoltMath.Polar(radians);
 
+      // Initialize CCD properties
+      this.EnableCCD = false;
+      this.CCDVelocityThreshold = VoltConfig.CCD_VELOCITY_THRESHOLD;
+      this.PreviousPosition = position;
+      this.PreviousAngle = radians;
+
 #if DEBUG
       for (int i = 0; i < shapesToAdd.Length; i++)
         VoltDebug.Assert(shapesToAdd[i].IsInitialized);
@@ -429,6 +458,11 @@ namespace Volatile
     {
       if (this.history != null)
         this.history.Store(this.currentState);
+      
+      // Store previous position for CCD
+      this.PreviousPosition = this.Position;
+      this.PreviousAngle = this.Angle;
+      
       this.Integrate();
       this.OnPositionUpdated();
     }
@@ -447,7 +481,7 @@ namespace Volatile
 
     internal void FreeShapes()
     {
-      if (this.World != null)
+      if this.World != null)
       {
         for (int i = 0; i < this.shapeCount; i++)
           this.World.FreeShape(this.shapes[i]);
@@ -723,6 +757,148 @@ namespace Volatile
       Gizmos.color = current;
     }
 #endif
+    #endregion
+
+    #region Continuous Collision Detection
+    /// <summary>
+    /// Checks if this body requires CCD based on its velocity.
+    /// </summary>
+    internal bool RequiresCCD()
+    {
+      if (!this.EnableCCD || this.IsStatic)
+        return false;
+
+      Fix64 linearSpeed = this.LinearVelocity.magnitude;
+      Fix64 angularSpeed = Fix64.Abs(this.AngularVelocity);
+      
+      return linearSpeed >= this.CCDVelocityThreshold || 
+             angularSpeed >= VoltConfig.CCD_ANGULAR_SLOP;
+    }
+
+    /// <summary>
+    /// Performs a swept collision test for CCD.
+    /// Returns the time of impact (0-1) or 1 if no collision.
+    /// </summary>
+    internal Fix64 SweepTest(VoltBody other, out VoltVector2 contactPoint, out VoltVector2 contactNormal)
+    {
+      contactPoint = VoltVector2.zero;
+      contactNormal = VoltVector2.zero;
+
+      if (other == null || other.IsStatic == this.IsStatic)
+        return Fix64.One;
+
+      // Simple swept AABB test for now
+      VoltAABB currentAABB = this.AABB;
+      VoltAABB targetAABB = this.GetSweptAABB();
+      VoltAABB otherAABB = other.AABB;
+
+      if (!targetAABB.Intersects(otherAABB))
+        return Fix64.One;
+
+      // Calculate relative velocity
+      VoltVector2 relativeVelocity = this.LinearVelocity - other.LinearVelocity;
+      
+      if (relativeVelocity.sqrMagnitude < VoltConfig.CCD_LINEAR_SLOP * VoltConfig.CCD_LINEAR_SLOP)
+        return Fix64.One;
+
+      // Perform raycast from current position to target position
+      VoltVector2 deltaPosition = this.Position - this.PreviousPosition;
+      
+      if (deltaPosition.sqrMagnitude < VoltConfig.CCD_LINEAR_SLOP * VoltConfig.CCD_LINEAR_SLOP)
+        return Fix64.One;
+
+      // Simple time calculation based on AABB intersection
+      Fix64 timeOfImpact = this.CalculateTimeOfImpact(other, deltaPosition);
+      
+      if (timeOfImpact < Fix64.One)
+      {
+        // Calculate contact point and normal
+        VoltVector2 impactPosition = this.PreviousPosition + deltaPosition * timeOfImpact;
+        contactPoint = impactPosition;
+        contactNormal = (other.Position - impactPosition).normalized;
+      }
+
+      return timeOfImpact;
+    }
+
+    /// <summary>
+    /// Gets the swept AABB for this body's movement.
+    /// </summary>
+    internal VoltAABB GetSweptAABB()
+    {
+      VoltAABB currentAABB = this.AABB;
+      VoltVector2 deltaPosition = this.Position - this.PreviousPosition;
+      
+      VoltAABB sweptAABB = currentAABB;
+      
+      if (deltaPosition.x < Fix64.Zero)
+        sweptAABB.Min.x += deltaPosition.x;
+      else
+        sweptAABB.Max.x += deltaPosition.x;
+        
+      if (deltaPosition.y < Fix64.Zero)
+        sweptAABB.Min.y += deltaPosition.y;
+      else
+        sweptAABB.Max.y += deltaPosition.y;
+      
+      return sweptAABB;
+    }
+
+    /// <summary>
+    /// Calculates the time of impact between this body and another.
+    /// </summary>
+    private Fix64 CalculateTimeOfImpact(VoltBody other, VoltVector2 deltaPosition)
+    {
+      VoltAABB thisAABB = this.AABB;
+      VoltAABB otherAABB = other.AABB;
+      
+      // Calculate when AABBs would first touch
+      Fix64 tMinX, tMaxX, tMinY, tMaxY;
+      
+      if (deltaPosition.x > Fix64.Zero)
+      {
+        tMinX = (otherAABB.Min.x - thisAABB.Max.x) / deltaPosition.x;
+        tMaxX = (otherAABB.Max.x - thisAABB.Min.x) / deltaPosition.x;
+      }
+      else if (deltaPosition.x < Fix64.Zero)
+      {
+        tMinX = (otherAABB.Max.x - thisAABB.Min.x) / deltaPosition.x;
+        tMaxX = (otherAABB.Min.x - thisAABB.Max.x) / deltaPosition.x;
+      }
+      else
+      {
+        if (thisAABB.Min.x > otherAABB.Max.x || thisAABB.Max.x < otherAABB.Min.x)
+          return Fix64.One;
+        tMinX = Fix64.Zero;
+        tMaxX = Fix64.One;
+      }
+      
+      if (deltaPosition.y > Fix64.Zero)
+      {
+        tMinY = (otherAABB.Min.y - thisAABB.Max.y) / deltaPosition.y;
+        tMaxY = (otherAABB.Max.y - thisAABB.Min.y) / deltaPosition.y;
+      }
+      else if (deltaPosition.y < Fix64.Zero)
+      {
+        tMinY = (otherAABB.Max.y - thisAABB.Min.y) / deltaPosition.y;
+        tMaxY = (otherAABB.Min.y - thisAABB.Max.y) / deltaPosition.y;
+      }
+      else
+      {
+        if (thisAABB.Min.y > otherAABB.Max.y || thisAABB.Max.y < otherAABB.Min.y)
+          return Fix64.One;
+        tMinY = Fix64.Zero;
+        tMaxY = Fix64.One;
+      }
+      
+      Fix64 tMin = Fix64.Max(tMinX, tMinY);
+      Fix64 tMax = Fix64.Min(tMaxX, tMaxY);
+      
+      if (tMin > tMax || tMax < Fix64.Zero || tMin > Fix64.One)
+        return Fix64.One;
+        
+      return Fix64.Max(Fix64.Zero, tMin);
+    }
     #endregion
   }
 }

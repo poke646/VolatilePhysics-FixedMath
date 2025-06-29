@@ -55,5 +55,12 @@ namespace Volatile
     // The minimum mass a dynamic object can have before it is
     // converted to a static object
     internal static readonly Fix64 MINIMUM_DYNAMIC_MASS = (Fix64)0.00001M;
+
+    // Continuous Collision Detection (CCD) settings
+    public static readonly Fix64 CCD_LINEAR_SLOP = (Fix64)0.005M;
+    public static readonly Fix64 CCD_ANGULAR_SLOP = (Fix64)0.01745329M; // 1 degree in radians
+    public static readonly Fix64 CCD_VELOCITY_THRESHOLD = (Fix64)1.0M;
+    public static readonly int CCD_MAX_ITERATIONS = 10;
+    public static readonly Fix64 CCD_TIME_TOLERANCE = (Fix64)0.001M;
   }
 }

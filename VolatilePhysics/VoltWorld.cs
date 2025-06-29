@@ -286,172 +286,28 @@ namespace Volatile
         }
 
         /// <summary>
-        /// Ticks the world, updating all dynamic bodies and resolving collisions.
-        /// If a frame number is provided, all dynamic bodies will store their
-        /// state for that frame for later testing.
+        /// Enables Continuous Collision Detection for a body.
         /// </summary>
-        public void Update()
+        /// <param name="body">The body to enable CCD for</param>
+        /// <param name="velocityThreshold">Optional velocity threshold for CCD activation</param>
+        public void EnableCCD(VoltBody body, Fix64? velocityThreshold = null)
         {
-            for (int i = 0; i < this.bodies.Count; i++)
-            {
-                VoltBody body = this.bodies[i];
-                if (body.IsStatic == false)
-                {
-                    body.Update();
-                    this.dynamicBroadphase.UpdateBody(body);
-                }
-            }
-
-            this.BroadPhase();
-
-            this.UpdateCollision();
-            this.FreeManifolds();
+            VoltDebug.Assert(body.World == this);
+            
+            body.EnableCCD = true;
+            if (velocityThreshold.HasValue)
+                body.CCDVelocityThreshold = velocityThreshold.Value;
         }
 
         /// <summary>
-        /// Updates a single body, resolving only collisions with that body.
-        /// If a frame number is provided, all dynamic bodies will store their
-        /// state for that frame for later testing.
-        /// 
-        /// Note: This function is best used with dynamic collisions disabled, 
-        /// otherwise you might get symmetric duplicates on collisions.
+        /// Disables Continuous Collision Detection for a body.
         /// </summary>
-        public void Update(VoltBody body, bool collideDynamic = false)
+        /// <param name="body">The body to disable CCD for</param>
+        public void DisableCCD(VoltBody body)
         {
-            if (body.IsStatic)
-            {
-                VoltDebug.LogWarning("Updating static body, doing nothing");
-                return;
-            }
-
-            body.Update();
-            this.dynamicBroadphase.UpdateBody(body);
-            this.BroadPhase(body, collideDynamic);
-
-            this.UpdateCollision();
-            this.FreeManifolds();
+            VoltDebug.Assert(body.World == this);
+            body.EnableCCD = false;
         }
-
-        /// <summary>
-        /// Finds all bodies containing a given point.
-        /// 
-        /// Subsequent calls to other Query functions (Point, Circle, Bounds) will
-        /// invalidate the resulting enumeration from this function.
-        /// </summary>
-        public VoltBuffer<VoltBody> QueryPoint(
-          VoltVector2 point,
-          VoltBodyFilter filter = null,
-          int ticksBehind = 0)
-        {
-            if (ticksBehind < 0)
-                throw new ArgumentOutOfRangeException("ticksBehind");
-
-            this.reusableBuffer.Clear();
-            this.staticBroadphase.QueryPoint(point, this.reusableBuffer);
-            this.dynamicBroadphase.QueryPoint(point, this.reusableBuffer);
-
-            this.reusableOutput.Clear();
-            for (int i = 0; i < this.reusableBuffer.Count; i++)
-            {
-                VoltBody body = this.reusableBuffer[i];
-                if (VoltBody.Filter(body, filter))
-                    if (body.QueryPoint(point, ticksBehind))
-                        this.reusableOutput.Add(body);
-            }
-            return this.reusableOutput;
-        }
-
-        /// <summary>
-        /// Finds all bodies intersecting with a given circle.
-        /// 
-        /// Subsequent calls to other Query functions (Point, Circle, Bounds) will
-        /// invalidate the resulting enumeration from this function.
-        /// </summary>
-        public VoltBuffer<VoltBody> QueryCircle(
-          VoltVector2 origin,
-          Fix64 radius,
-          VoltBodyFilter filter = null,
-          int ticksBehind = 0)
-        {
-            if (ticksBehind < 0)
-                throw new ArgumentOutOfRangeException("ticksBehind");
-
-            this.reusableBuffer.Clear();
-            this.staticBroadphase.QueryCircle(origin, radius, this.reusableBuffer);
-            this.dynamicBroadphase.QueryCircle(origin, radius, this.reusableBuffer);
-
-            this.reusableOutput.Clear();
-            for (int i = 0; i < this.reusableBuffer.Count; i++)
-            {
-                VoltBody body = this.reusableBuffer[i];
-                if (VoltBody.Filter(body, filter))
-                    if (body.QueryCircle(origin, radius, ticksBehind))
-                        this.reusableOutput.Add(body);
-            }
-
-            return this.reusableOutput;
-        }
-
-        /// <summary>
-        /// Performs a raycast on all world bodies.
-        /// </summary>
-        public bool RayCast(
-          ref VoltRayCast ray,
-          ref VoltRayResult result,
-          VoltBodyFilter filter = null,
-          int ticksBehind = 0)
-        {
-            if (ticksBehind < 0)
-                throw new ArgumentOutOfRangeException("ticksBehind");
-
-            this.reusableBuffer.Clear();
-            this.staticBroadphase.RayCast(ref ray, this.reusableBuffer);
-            this.dynamicBroadphase.RayCast(ref ray, this.reusableBuffer);
-
-            for (int i = 0; i < this.reusableBuffer.Count; i++)
-            {
-                VoltBody body = this.reusableBuffer[i];
-                if (VoltBody.Filter(body, filter))
-                {
-                    body.RayCast(ref ray, ref result, ticksBehind);
-                    if (result.IsContained)
-                        return true;
-                }
-            }
-
-            return result.IsValid;
-        }
-
-        /// <summary>
-        /// Performs a circle cast on all world bodies.
-        /// </summary>
-        public bool CircleCast(
-          ref VoltRayCast ray,
-          Fix64 radius,
-          ref VoltRayResult result,
-          VoltBodyFilter filter = null,
-          int ticksBehind = 0)
-        {
-            if (ticksBehind < 0)
-                throw new ArgumentOutOfRangeException("ticksBehind");
-
-            this.reusableBuffer.Clear();
-            this.staticBroadphase.CircleCast(ref ray, radius, this.reusableBuffer);
-            this.dynamicBroadphase.CircleCast(ref ray, radius, this.reusableBuffer);
-
-            for (int i = 0; i < this.reusableBuffer.Count; i++)
-            {
-                VoltBody body = this.reusableBuffer[i];
-                if (VoltBody.Filter(body, filter))
-                {
-                    body.CircleCast(ref ray, radius, ref result, ticksBehind);
-                    if (result.IsContained)
-                        return true;
-                }
-            }
-            return result.IsValid;
-        }
-
         #region Internals
         private void AddBodyInternal(VoltBody body)
         {
@@ -570,6 +426,111 @@ namespace Volatile
                     this.manifolds[i].Solve();
         }
 
+        /// <summary>
+        /// Performs Continuous Collision Detection for fast-moving bodies.
+        /// </summary>
+        private void UpdateContinuousCollision()
+        {
+            for (int i = 0; i < this.bodies.Count; i++)
+            {
+                VoltBody bodyA = this.bodies[i];
+                if (!bodyA.RequiresCCD())
+                    continue;
+
+                // Check CCD against static bodies
+                this.staticBroadphase.QueryAABB(
+                    bodyA.GetSweptAABB(),
+                    this.reusableBuffer,
+                    FilterAll);
+
+                for (int j = 0; j < this.reusableBuffer.Count; j++)
+                {
+                    VoltBody bodyB = this.reusableBuffer[j];
+                    this.PerformCCDCheck(bodyA, bodyB);
+                }
+
+                // Check CCD against other dynamic bodies
+                this.dynamicBroadphase.QueryAABB(
+                    bodyA.GetSweptAABB(),
+                    this.reusableBuffer,
+                    FilterExcept(bodyA));
+
+                for (int j = 0; j < this.reusableBuffer.Count; j++)
+                {
+                    VoltBody bodyB = this.reusableBuffer[j];
+                    // Only check if the other body also requires CCD or if it's much slower
+                    if (bodyB.RequiresCCD() || bodyA.LinearVelocity.sqrMagnitude > bodyB.LinearVelocity.sqrMagnitude * 4)
+                    {
+                        this.PerformCCDCheck(bodyA, bodyB);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Performs a CCD check between two bodies and resolves early collision if found.
+        /// </summary>
+        private void PerformCCDCheck(VoltBody bodyA, VoltBody bodyB)
+        {
+            if (bodyA.CollisionFilter != null && !bodyA.CollisionFilter(bodyA, bodyB))
+                return;
+            if (bodyB.CollisionFilter != null && !bodyB.CollisionFilter(bodyA, bodyB))
+                return;
+
+            VoltVector2 contactPoint, contactNormal;
+            Fix64 timeOfImpact = bodyA.SweepTest(bodyB, out contactPoint, out contactNormal);
+
+            if (timeOfImpact < Fix64.One - VoltConfig.CCD_TIME_TOLERANCE)
+            {
+                // Move bodies to the time of impact
+                this.ResolveCCDCollision(bodyA, bodyB, timeOfImpact, contactPoint, contactNormal);
+            }
+        }
+
+        /// <summary>
+        /// Resolves a CCD collision by moving bodies to the point of impact and adjusting velocities.
+        /// </summary>
+        private void ResolveCCDCollision(VoltBody bodyA, VoltBody bodyB, Fix64 timeOfImpact, 
+            VoltVector2 contactPoint, VoltVector2 contactNormal)
+        {
+            // Move bodyA to the impact position
+            VoltVector2 deltaA = bodyA.Position - bodyA.PreviousPosition;
+            Fix64 angleDeltaA = bodyA.Angle - bodyA.PreviousAngle;
+            
+            bodyA.Set(bodyA.PreviousPosition + deltaA * timeOfImpact, 
+                     bodyA.PreviousAngle + angleDeltaA * timeOfImpact);
+
+            if (!bodyB.IsStatic)
+            {
+                // Move bodyB to the impact position
+                VoltVector2 deltaB = bodyB.Position - bodyB.PreviousPosition;
+                Fix64 angleDeltaB = bodyB.Angle - bodyB.PreviousAngle;
+                
+                bodyB.Set(bodyB.PreviousPosition + deltaB * timeOfImpact, 
+                         bodyB.PreviousAngle + angleDeltaB * timeOfImpact);
+            }
+
+            // Apply impulse resolution
+            VoltVector2 relativeVelocity = bodyA.LinearVelocity - (bodyB.IsStatic ? VoltVector2.zero : bodyB.LinearVelocity);
+            Fix64 separatingVelocity = VoltVector2.Dot(relativeVelocity, contactNormal);
+
+            if (separatingVelocity < Fix64.Zero) // Bodies are approaching
+            {
+                // Calculate impulse magnitude
+                Fix64 restitution = Fix64.One; // Use full restitution for CCD
+                Fix64 impulse = -(Fix64.One + restitution) * separatingVelocity;
+                impulse /= bodyA.InvMass + (bodyB.IsStatic ? Fix64.Zero : bodyB.InvMass);
+
+                // Apply impulse
+                VoltVector2 impulseVector = contactNormal * impulse;
+                bodyA.LinearVelocity += impulseVector * bodyA.InvMass;
+                
+                if (!bodyB.IsStatic)
+                {
+                    bodyB.LinearVelocity -= impulseVector * bodyB.InvMass;
+                }
+            }
+        }
         #region Pooling
         internal Contact AllocateContact()
         {
